@@ -2,15 +2,15 @@
 
 namespace vektah\parser_combinator\parser\literal;
 
+use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
-use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\NegativeCharParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\StringParser;
-use vektah\parser_combinator\Result;
 
 class StringLiteral implements Parser
 {

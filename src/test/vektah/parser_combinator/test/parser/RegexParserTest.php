@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\test\parser;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\RegexParser;
 

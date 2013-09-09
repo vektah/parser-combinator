@@ -2,10 +2,8 @@
 
 namespace vektah\parser_combinator\formatter;
 
-use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\Parser;
-use vektah\parser_combinator\Result;
 
 class Flatten implements Parser
 {

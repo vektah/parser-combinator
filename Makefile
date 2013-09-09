@@ -22,6 +22,11 @@ lint: depends
 	$(BUGFREE_BIN) lint src
 	echo
 
+typefix: depends
+	echo " --- Autofixing uses ---"
+	$(BUGFREE_BIN) lint -a src
+	echo
+
 style:
 	echo " --- Style Checks ---"
 	# Currently only checking src/test as src/main still needs a bit of work

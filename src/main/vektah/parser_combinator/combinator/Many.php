@@ -10,10 +10,9 @@
 namespace vektah\parser_combinator\combinator;
 
 
-use vektah\parser_combinator\exception\GrammarException;
-use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
+use vektah\parser_combinator\exception\GrammarException;
 
 class Many extends Choice
 {

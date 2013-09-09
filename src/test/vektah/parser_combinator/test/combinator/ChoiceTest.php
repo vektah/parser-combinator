@@ -3,9 +3,8 @@
 namespace vektah\parser_combinator\test\combinator;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\parser\StringParser;
+use vektah\parser_combinator\combinator\Choice;
 
 class ChoiceTest extends TestCase
 {

@@ -3,10 +3,9 @@
 namespace vektah\parser_combinator\test\combinator;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\exception\GrammarException;
-use vektah\parser_combinator\exception\ParseException;
-use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\StringParser;
 

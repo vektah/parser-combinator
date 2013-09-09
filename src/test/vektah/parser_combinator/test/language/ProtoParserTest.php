@@ -4,8 +4,8 @@ namespace vektah\parser_combinator\test\language;
 
 use PHPUnit_Framework_TestCase as TestCase;
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\language\proto\Field;
 use vektah\parser_combinator\language\ProtoParser;
+use vektah\parser_combinator\language\proto\Field;
 
 class ProtoParserTest extends TestCase
 {

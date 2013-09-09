@@ -2,26 +2,22 @@
 
 namespace vektah\parser_combinator\language;
 
+use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\formatter\Closure;
-use vektah\parser_combinator\formatter\Concatenate;
-use vektah\parser_combinator\Input;
 use vektah\parser_combinator\language\proto\Field;
 use vektah\parser_combinator\language\proto\Message;
-use vektah\parser_combinator\parser\CharParser;
-use vektah\parser_combinator\parser\CharRangeParser;
-use vektah\parser_combinator\parser\literal\FloatLiteral;
-use vektah\parser_combinator\parser\literal\IntLiteral;
-use vektah\parser_combinator\parser\literal\StringLiteral;
-use vektah\parser_combinator\parser\NegativeCharParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
 use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
+use vektah\parser_combinator\parser\literal\FloatLiteral;
+use vektah\parser_combinator\parser\literal\IntLiteral;
+use vektah\parser_combinator\parser\literal\StringLiteral;
 
 /**
  * Parser for google protobuffers proto files.

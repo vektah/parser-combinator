@@ -2,11 +2,11 @@
 
 namespace vektah\parser_combinator\combinator;
 
-use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
+use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\StringParser;
-use vektah\parser_combinator\Result;
 
 abstract class Combinator implements Parser
 {

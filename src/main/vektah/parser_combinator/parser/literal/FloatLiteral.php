@@ -2,16 +2,16 @@
 
 namespace vektah\parser_combinator\parser\literal;
 
+use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
-use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
-use vektah\parser_combinator\Result;
 
 /**
  * Matches:
