@@ -42,7 +42,7 @@ class IntLiteral implements Parser
         }
 
         if ($hex) {
-            $hexInt = new Closure(new Concatenate(new Sequence([new StringParser('0', true, false), new PositiveMatch(), new CharParser('xX', 1, 1, false), new PositiveMatch(), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'], 1), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'])])), function($data) {
+            $hexInt = new Closure(new Concatenate(new Sequence([new StringParser('0', true, false), new CharParser('xX', 1, 1, false), new PositiveMatch(), new PositiveMatch(), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'], 1), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'])])), function($data) {
                 return hexdec($data);
             });
 
