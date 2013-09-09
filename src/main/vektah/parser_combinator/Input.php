@@ -110,6 +110,17 @@ class Input
         return substr_compare($this->string, $string, $this->offset, $len, !$case_sensitive) === 0;
     }
 
+    /**
+     * @return string the character at offset $i from the current position
+     */
+    public function peek($i)
+    {
+        if ($this->offset + $i >= $this->strlen) {
+            return null;
+        }
+        return $this->string[$this->offset + $i];
+    }
+
     public function match($pattern, &$matches)
     {
         // It may turn out that it is faster to build a regex that expects .{$offset} instead of ^

@@ -4,6 +4,7 @@ namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 
 /**
  * Look for a matching regex at the given offset
@@ -29,17 +30,17 @@ class RegexParser implements Parser
     public function parse(Input $input)
     {
         if (!$input->match($this->expression, $matches)) {
-            throw new ParseException("At {$input->getPositionDescription()}: Expected regex '{$this->expression}' to match '{$input->get()}', it does not.");
+            return Result::error("At {$input->getPositionDescription()}: Expected regex '{$this->expression}' to match '{$input->get()}', it does not.");
         }
 
         if (!$this->capture) {
             $input->consume(strlen($matches[0]));
-            return null;
+            return Result::nonCapturingMatch();
         }
 
         $output = $input->get(strlen($matches[0]));
         $input->consume(strlen($matches[0]));
 
-        return $output;
+        return Result::match($output);
     }
 }

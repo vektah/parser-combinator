@@ -13,8 +13,9 @@ class StringParserTest extends TestCase
     {
         $input = new Input("asdf");
         $parser = new StringParser('asdf');
-;
-        $this->assertEquals('asdf', $parser->parse($input));
+        $result = $parser->parse($input);
+        $this->assertEquals('asdf', $result->data);
+        $this->assertEquals(true, $result->hasData);
         $this->assertEquals(4, $input->getOffset());
     }
 
@@ -23,7 +24,7 @@ class StringParserTest extends TestCase
         $input = new Input("asdf", 1);
         $parser = new StringParser('sdf');
 
-        $this->assertEquals('sdf', $parser->parse($input));
+        $this->assertEquals('sdf', $parser->parse($input)->data);
         $this->assertEquals(4, $input->getOffset());
     }
 
@@ -32,7 +33,7 @@ class StringParserTest extends TestCase
         $input = new Input("asdf", 1);
         $parser = new StringParser('sd');
 
-        $this->assertEquals('sd', $parser->parse($input));
+        $this->assertEquals('sd', $parser->parse($input)->data);
         $this->assertEquals(3, $input->getOffset());
     }
 
@@ -41,8 +42,7 @@ class StringParserTest extends TestCase
         $input = new Input("asdf");
         $parser = new StringParser('sdf');
 
-        $this->setExpectedException(ParseException::_CLASS);
-        $parser->parse($input);
+        $this->assertNotNull($parser->parse($input)->errorMessage);
     }
 
     public function testNotMatchingAtOffset()
@@ -50,28 +50,26 @@ class StringParserTest extends TestCase
         $input = new Input("asdf", 1);
         $parser = new StringParser('asdf');
 
-        $this->setExpectedException(ParseException::_CLASS);
-        $parser->parse($input);
+        $this->assertNotNull($parser->parse($input)->errorMessage);
     }
 
     public function testNonCapturing()
     {
         $parser = new StringParser('asdf', true, false);
 
-        $this->assertNull($parser->parse(new Input('asdf')));
+        $this->assertFalse($parser->parse(new Input('asdf'))->hasData);
     }
 
     public function testCaseInsensitive()
     {
         $parser = new StringParser('asdf', false);
-        $this->assertEquals('Asdf', $parser->parse(new Input('Asdf')));
+        $this->assertEquals('Asdf', $parser->parse(new Input('Asdf'))->data);
     }
 
     public function testCaseSensitive()
     {
         $parser = new StringParser('asdf', true);
 
-        $this->setExpectedException(ParseException::_CLASS, 'At line 1 offset 1: Expected \'asdf\' but found \'Asdf\'');
-        $parser->parse(new Input("Asdf"));
+        $this->assertEquals('At line 1 offset 1: Expected \'asdf\' but found \'Asdf\'', $parser->parse(new Input("Asdf"))->errorMessage);
     }
 }

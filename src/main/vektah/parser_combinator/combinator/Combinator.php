@@ -5,6 +5,8 @@ namespace vektah\parser_combinator\combinator;
 use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\Parser;
+use vektah\parser_combinator\parser\StringParser;
+use vektah\parser_combinator\Result;
 
 abstract class Combinator implements Parser
 {
@@ -18,8 +20,10 @@ abstract class Combinator implements Parser
 
     public function __construct(array $parsers = [])
     {
-        foreach ($parsers as $parser) {
-            if (!$parser instanceof Parser) {
+        foreach ($parsers as $id => $parser) {
+            if (is_string($parser)) {
+                $parsers[$id] = new StringParser($parser);
+            } elseif (!$parser instanceof Parser) {
                 throw new GrammarException('There is an object that is not a parser in this combinator.');
             }
         }
@@ -36,20 +40,13 @@ abstract class Combinator implements Parser
         return $this->parsers;
     }
 
-    public function formatCallback(callable $callback)
-    {
-        $this->formatCallback = $callback;
-    }
-
+    /**
+     * @return Result
+     */
     public function parse(Input $input)
     {
         $result = $this->combine($input);
-
-        if ($this->formatCallback) {
-            return call_user_func($this->formatCallback, $result);
-        } else {
-            return $result;
-        }
+        return $result;
     }
 
     abstract public function combine(Input $input);

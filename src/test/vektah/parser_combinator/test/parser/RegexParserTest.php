@@ -12,8 +12,8 @@ class RegexParserTest extends TestCase
     public function testMatch()
     {
         $parser = new RegexParser('/^asdf/i');
-        $this->assertEquals('asdf', $parser->parse(new Input('asdf')));
-        $this->assertEquals('Asdf', $parser->parse(new Input('Asdf')));
+        $this->assertEquals('asdf', $parser->parse(new Input('asdf'))->data);
+        $this->assertEquals('Asdf', $parser->parse(new Input('Asdf'))->data);
     }
 
     public function testMustStartWithAnchor()
@@ -26,15 +26,14 @@ class RegexParserTest extends TestCase
     {
         $parser = new RegexParser('/^asdf/i');
 
-        $this->setExpectedException(ParseException::_CLASS, "At line 1 offset 1: Expected regex '/^asdf/i' to match 'fff', it does not.");
-        $parser->parse(new Input('fff'));
+        $this->assertEquals("At line 1 offset 1: Expected regex '/^asdf/i' to match 'fff', it does not.", $parser->parse(new Input('fff'))->errorMessage);
     }
 
     public function testNonCapturing()
     {
         $parser = new RegexParser('/^asdf/', false);
 
-        $this->assertEquals(null, $parser->parse($input = new Input('asdf')));
+        $this->assertEquals(null, $parser->parse($input = new Input('asdf'))->data);
         $this->assertEquals(4, $input->getOffset());
     }
 }

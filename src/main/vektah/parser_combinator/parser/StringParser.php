@@ -4,6 +4,7 @@ namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 
 /**
  * Parse a single static string. String matching is quite efficient, but returning a result will copy that substring.
@@ -28,18 +29,22 @@ class StringParser implements Parser
 
     public function parse(Input $input)
     {
+        if ($this->needle == '') {
+            return Result::nonCapturingMatch();
+        }
+
         if (!$input->startsWith($this->needle, $this->case_sensitive)) {
-            throw new ParseException("At {$input->getPositionDescription()}: Expected '{$this->needle}' but found '{$input->get()}'");
+            return Result::error("At {$input->getPositionDescription()}: Expected '{$this->needle}' but found '{$input->get()}'");
         }
 
         if (!$this->capture) {
             $input->consume(strlen($this->needle));
-            return null;
+            return Result::nonCapturingMatch();
         }
 
         $output = $input->get(strlen($this->needle));
         $input->consume(strlen($this->needle));
 
-        return $output;
+        return Result::match($output);
     }
 }

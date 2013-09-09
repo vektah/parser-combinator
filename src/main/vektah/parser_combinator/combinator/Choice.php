@@ -4,6 +4,7 @@ namespace vektah\parser_combinator\combinator;
 
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 
 /**
  * Matches any one of the parsers
@@ -16,17 +17,18 @@ class Choice extends Combinator
 
         foreach ($this->getParsers() as $parser) {
             // Keep trying each of the parsers until one matches.
-            try {
-                $result = $parser->parse($input);
-            } catch (ParseException $e) {
-                // To be safe we rewind the input
-                $input->setOffset($initialOffset);
-                continue;
+
+            $result = $parser->parse($input);
+
+            // Errors and positive results will stop us from searching.
+            if (!$result->errorMessage || $result->positiveMatch) {
+                return $result;
             }
 
-            return $result;
+            // To be safe we rewind the input after each attempt.
+            $input->setOffset($initialOffset);
         }
 
-        throw new ParseException('At ' . $input->getPositionDescription() . ": Could not find any options that match {$input->get()}");
+        return Result::error('At ' . $input->getPositionDescription() . ": Could not find any options that match {$input->get()}");
     }
 }

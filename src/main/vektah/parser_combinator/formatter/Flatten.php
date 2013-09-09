@@ -2,8 +2,10 @@
 
 namespace vektah\parser_combinator\formatter;
 
+use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\Parser;
+use vektah\parser_combinator\Result;
 
 class Flatten implements Parser
 {
@@ -16,20 +18,22 @@ class Flatten implements Parser
 
     public function parse(Input $input)
     {
-        $original_array = $this->parser->parse($input);
+        $original_result = $this->parser->parse($input);
 
-        if (is_array($original_array)) {
+        if (is_array($original_result->data)) {
             $result = array();
             array_walk_recursive(
-                $original_array,
+                $original_result->data,
                 function ($v, $k) use (&$result) {
                     $result[] = $v;
                 }
             );
 
-            return $result;
+            $original_result->data = $result;
+
+            return $original_result;
         } else {
-            return $result;
+            return $original_result;
         }
     }
 }

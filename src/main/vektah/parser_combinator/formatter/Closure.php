@@ -22,6 +22,14 @@ class Closure implements Parser
 
     public function parse(Input $input)
     {
-        return call_user_func($this->function, $this->parser->parse($input));
+        $result = $this->parser->parse($input);
+        // Don't call the callback if there was an error.
+        if ($result->errorMessage) {
+            return $result;
+        }
+
+        $result->data = call_user_func($this->function, $result->data);
+
+        return $result;
     }
 }

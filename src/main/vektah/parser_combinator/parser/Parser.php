@@ -4,6 +4,7 @@ namespace vektah\parser_combinator\parser;
 
 
 use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 
 interface Parser
 {
@@ -12,7 +13,7 @@ interface Parser
      *
      * @param Input $input
      *
-     * @return mixed result
+     * @return Result result
      */
     public function parse(Input $input);
 }

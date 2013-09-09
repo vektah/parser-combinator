@@ -128,8 +128,17 @@ class InputTest extends TestCase
         $this->assertEquals(4, $input->getLine(17));
         $this->assertEquals(4, $input->getLine(18));
         $this->assertEquals(4, $input->getLine(19));
+    }
 
+    public function testPeek()
+    {
+        $input = new Input('1234');
 
+        $this->assertEquals('1', $input->peek(0));
+        $this->assertEquals('2', $input->peek(1));
+        $this->assertEquals('3', $input->peek(2));
+        $this->assertEquals('4', $input->peek(3));
 
+        $this->assertEquals(0, $input->getOffset());
     }
 }

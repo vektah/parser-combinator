@@ -14,26 +14,25 @@ class ManyTest extends TestCase
 {
     public function testSingle()
     {
-        $many = new Many([new StringParser('asdf')]);
+        $many = new Many(['asdf']);
 
-        $this->assertEquals(['asdf'], $many->parse(new Input('asdf')));
-        $this->assertEquals(['asdf', 'asdf'], $many->parse(new Input('asdfasdf')));
+        $this->assertEquals(['asdf'], $many->parse(new Input('asdf'))->data);
+        $this->assertEquals(['asdf', 'asdf'], $many->parse(new Input('asdfasdf'))->data);
     }
 
     public function testMultiple()
     {
-        $many = new Many([new StringParser('asdf'), new StringParser('hjkl')]);
+        $many = new Many(['asdf', 'hjkl']);
 
-        $this->assertEquals(['hjkl'], $many->parse(new Input('hjkl')));
-        $this->assertEquals(['hjkl', 'asdf'], $many->parse(new Input('hjklasdf')));
+        $this->assertEquals(['hjkl'], $many->parse(new Input('hjkl'))->data);
+        $this->assertEquals(['hjkl', 'asdf'], $many->parse(new Input('hjklasdf'))->data);
     }
 
     public function testMin()
     {
         $many = new Many([new StringParser('asdf')], 2);
 
-        $this->setExpectedException(ParseException::_CLASS, 'At line 1 offset 5: Expected 2 elements, but found 1');
-        $many->parse(new Input('asdf'));
+        $this->assertEquals('At line 1 offset 5: Expected 2 elements, but found 1', $many->parse(new Input('asdf'))->errorMessage);
     }
 
     public function testMax()
@@ -41,8 +40,8 @@ class ManyTest extends TestCase
         $many = new Many([new StringParser('asdf')], 0, 2);
 
         $input = new Input('asdfasdfasdf');
-        $this->assertEquals(['asdf', 'asdf'], $many->parse($input));
-        $this->assertEquals(['asdf'], $many->parse($input));
+        $this->assertEquals(['asdf', 'asdf'], $many->parse($input)->data);
+        $this->assertEquals(['asdf'], $many->parse($input)->data);
     }
 
     public function testZeroWidthMatch()
