@@ -106,28 +106,28 @@ class ProtoExampleFilesTest extends TestCase
         ';
 
         $expected = [
-            new Package('some_package'),
+            new Package('some_package', [
+                new Message('Plugh', [
+                    new Field('optional', 'int32', 'foo', 1),
+                    new Extensions(10, new Identifier('max')),
+                ]),
 
-            new Message('Plugh', [
-                new Field('optional', 'int32', 'foo', 1),
-                new Extensions(10, new Identifier('max')),
-            ]),
-
-            new Extend('Plugh', [
-                new Field('optional', 'int32', 'bar', 10)
-            ]),
-
-            new Message('Thud', [
                 new Extend('Plugh', [
-                    new Field('optional', 'int32', 'baz', 11)
+                    new Field('optional', 'int32', 'bar', 10)
+                ]),
+
+                new Message('Thud', [
+                    new Extend('Plugh', [
+                        new Field('optional', 'int32', 'baz', 11)
+                    ])
+                ]),
+            ]),
+
+            new Package('another_package', [
+                new Extend('some_package.Plugh', [
+                    new Field('optional', 'int32', 'qux', 12)
                 ])
             ]),
-
-            new Package('another_package'),
-
-            new Extend('some_package.Plugh', [
-                new Field('optional', 'int32', 'qux', 12)
-            ])
         ];
 
         $this->assertEquals($expected, $this->parser->parse($input)->elements);

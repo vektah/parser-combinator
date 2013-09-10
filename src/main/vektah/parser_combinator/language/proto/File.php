@@ -17,30 +17,36 @@ class File {
      */
     public function traverse(callable $callback)
     {
-        $this->recurse($this->elements, $callback);
+        $this->recurse($this->elements, [], $callback);
     }
 
     /**
      * Internal function for recursing over the parse tree.
      */
-    private function recurse(array $elements, callable $callback) {
+    private function recurse(array $elements, array $namespace, callable $callback) {
         foreach ($elements as $element) {
-            $callback($element);
+            $callback($element, $namespace);
+
+            if (isset($element->name)) {
+                $elementNamespace = array_merge($namespace, [$element->name]);
+            } else {
+                $elementNamespace = $namespace;
+            }
 
             if (isset($element->values) && is_array($element->values)) {
-                $this->recurse($element->values, $callback);
+                $this->recurse($element->values, $elementNamespace, $callback);
             }
 
             if (isset($element->options) && is_array($element->options)) {
-                $this->recurse($element->options, $callback);
+                $this->recurse($element->options, $elementNamespace, $callback);
             }
 
             if (isset($element->members) && is_array($element->members)) {
-                $this->recurse($element->members, $callback);
+                $this->recurse($element->members, $elementNamespace, $callback);
             }
 
             if (isset($element->endpoints) && is_array($element->endpoints)) {
-                $this->recurse($element->members, $callback);
+                $this->recurse($element->members, $elementNamespace, $callback);
             }
         }
     }

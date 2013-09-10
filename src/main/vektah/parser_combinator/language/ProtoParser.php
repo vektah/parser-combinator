@@ -159,10 +159,6 @@ class ProtoParser
             return new Import($data[1]);
         });
 
-        $package = new Closure(new Sequence(['package', $positive, $ws, $identifier, $ws, ';', $ws]), function($data) {
-            return new Package($data[1]);
-        });
-
         $option = new Closure(new Sequence([
             'option', $positive, $ws,
             new Concatenate(new Sequence([
@@ -254,6 +250,15 @@ class ProtoParser
         });
 
         $definition->append($message);
+
+        $package = new Closure(new Sequence([
+            'package', $positive, $ws,
+            $identifier, $ws,
+            ';', $ws,
+            new Many([$option, $enum, $import, $message, $extend, $service])
+        ]), function($data) {
+            return new Package($data[1], $data[3]);
+        });
 
         $this->rootParser = new Closure(new Sequence([$ws, new Many([$option, $enum, $package, $import, $message, $extend, $service]), $ws, new EofParser()]), function($data) {
             return new File($data[0]);

@@ -215,11 +215,13 @@ class ProtoParserTest extends TestCase
 
         $flattened = [];
 
-        $out->traverse(function ($element) use (&$flattened) {
+        $out->traverse(function ($element, $namespace) use (&$flattened) {
+            $flattened[] = $namespace;
             $flattened[] = $element;
         });
 
         $this->assertEquals([
+            [],
             new Message('Bar', [
                 new Field('required', 'MessageType', 'type', 0),
                 new Field('required', 'bytes', 'data', 1),
@@ -229,13 +231,18 @@ class ProtoParserTest extends TestCase
                     new EnumValue('qwer', 1),
                 ])
             ]),
+            ['Bar'],
             new Field('required', 'MessageType', 'type', 0),
+            ['Bar'],
             new Field('required', 'bytes', 'data', 1),
+            ['Bar'],
             new Enum('Foo', [
                 new EnumValue('asdf', 0),
                 new EnumValue('qwer', 1),
             ]),
+            ['Bar', 'Foo'],
             new EnumValue('asdf', 0),
+            ['Bar', 'Foo'],
             new EnumValue('qwer', 1),
         ], $flattened);
     }
