@@ -29,6 +29,9 @@ class StringParser implements Parser
     public function parse(Input $input)
     {
         if ($this->needle == '') {
+            if ($this->capture) {
+                return Result::match('');
+            }
             return Result::nonCapturingMatch();
         }
 

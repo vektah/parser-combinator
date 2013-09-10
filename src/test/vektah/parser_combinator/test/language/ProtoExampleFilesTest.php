@@ -3,6 +3,11 @@
 namespace vektah\parser_combinator\test\language;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use vektah\parser_combinator\language\proto\EnumValue;
+use vektah\parser_combinator\language\proto\Import;
+use vektah\parser_combinator\language\proto\Option;
+use vektah\parser_combinator\language\proto\Rpc;
+use vektah\parser_combinator\language\proto\Service;
 use vektah\parser_combinator\language\ProtoParser;
 use vektah\parser_combinator\language\proto\Enum;
 use vektah\parser_combinator\language\proto\Extend;
@@ -12,9 +17,6 @@ use vektah\parser_combinator\language\proto\Identifier;
 use vektah\parser_combinator\language\proto\Message;
 use vektah\parser_combinator\language\proto\Package;
 
-/**
- * These tests input files were taken from https://metacpan.org/module/Google::ProtocolBuffers
- */
 class ProtoExampleFilesTest extends TestCase
 {
     private $parser;
@@ -26,6 +28,7 @@ class ProtoExampleFilesTest extends TestCase
 
     public function testSample1()
     {
+        // From https://metacpan.org/module/Google::ProtocolBuffers
         $input = '
              message Person {
               required string name  = 1;
@@ -54,14 +57,14 @@ class ProtoExampleFilesTest extends TestCase
                 new Field('optional', 'string', 'email', 3),
 
                 new Enum('PhoneType', [
-                    0 => 'MOBILE',
-                    1 => 'HOME',
-                    2 => 'WORK'
+                    new EnumValue('MOBILE', 0),
+                    new EnumValue('HOME', 1),
+                    new EnumValue('WORK', 2)
                 ]),
 
                 new Message('PhoneNumber', [
                     new Field('required', 'string', 'number', 1),
-                    new Field('optional', 'PhoneType', 'type', 2, new Identifier('HOME')),
+                    new Field('optional', 'PhoneType', 'type', 2, [new Option('default', new Identifier('HOME'))]),
                 ]),
 
                 new Field('repeated', 'PhoneNumber', 'phone', 4),
@@ -73,6 +76,7 @@ class ProtoExampleFilesTest extends TestCase
 
     public function testSample2()
     {
+        // From https://metacpan.org/module/Google::ProtocolBuffers
         $input = '
             package some_package;
             // message Plugh contains one regular field and three extensions
@@ -124,6 +128,133 @@ class ProtoExampleFilesTest extends TestCase
             new Extend('some_package.Plugh', [
                 new Field('optional', 'int32', 'qux', 12)
             ])
+        ];
+
+        $this->assertEquals($expected, $this->parser->parse($input));
+    }
+
+    public function testSample3()
+    {
+        // From https://developers.google.com/protocol-buffers/docs/proto
+        $input = '
+            import "google/protobuf/descriptor.proto";
+
+            extend google.protobuf.FileOptions {
+              optional string my_file_option = 50000;
+            }
+            extend google.protobuf.MessageOptions {
+              optional int32 my_message_option = 50001;
+            }
+            extend google.protobuf.FieldOptions {
+              optional float my_field_option = 50002;
+            }
+            extend google.protobuf.EnumOptions {
+              optional bool my_enum_option = 50003;
+            }
+            extend google.protobuf.EnumValueOptions {
+              optional uint32 my_enum_value_option = 50004;
+            }
+            extend google.protobuf.ServiceOptions {
+              optional MyEnum my_service_option = 50005;
+            }
+            extend google.protobuf.MethodOptions {
+              optional MyMessage my_method_option = 50006;
+            }
+
+            option (my_file_option) = "Hello world!";
+
+            message MyMessage {
+              option (my_message_option) = 1234;
+
+              optional int32 foo = 1 [(my_field_option) = 4.5];
+              optional string bar = 2;
+            }
+
+            enum MyEnum {
+              option (my_enum_option) = true;
+
+              FOO = 1 [(my_enum_value_option) = 321];
+              BAR = 2;
+            }
+
+            message RequestType {}
+            message ResponseType {}
+
+            service MyService {
+              option (my_service_option) = FOO;
+
+              rpc MyMethod(RequestType) returns(ResponseType) {
+                // Note:  my_method_option has type MyMessage.  We can set each field
+                //   within it using a separate "option" line.
+                option (my_method_option).foo = 567;
+                option (my_method_option).bar = "Some string";
+              }
+            }
+        ';
+
+        $expected = [
+            new Import('google/protobuf/descriptor.proto'),
+
+            new Extend('google.protobuf.FileOptions', [
+                new Field('optional', 'string', 'my_file_option', 50000)
+            ]),
+
+            new Extend('google.protobuf.MessageOptions', [
+                new Field('optional', 'int32', 'my_message_option', 50001)
+            ]),
+
+            new Extend('google.protobuf.FieldOptions', [
+                new Field('optional', 'float', 'my_field_option', 50002)
+            ]),
+
+            new Extend('google.protobuf.EnumOptions', [
+                new Field('optional', 'bool', 'my_enum_option', 50003)
+            ]),
+
+            new Extend('google.protobuf.EnumValueOptions', [
+                new Field('optional', 'uint32', 'my_enum_value_option', 50004)
+            ]),
+
+            new Extend('google.protobuf.ServiceOptions', [
+                new Field('optional', 'MyEnum', 'my_service_option', 50005)
+            ]),
+
+            new Extend('google.protobuf.MethodOptions', [
+                new Field('optional', 'MyMessage', 'my_method_option', 50006)
+            ]),
+
+            new Option('my_file_option', 'Hello world!'),
+
+            new Message('MyMessage', [
+                new Option('my_message_option', 1234),
+
+                new Field('optional', 'int32', 'foo', 1, [
+                    new Option('my_field_option', 4.5)
+                ]),
+                new Field('optional', 'string', 'bar', 2),
+            ]),
+
+            new Enum('MyEnum', [
+                new EnumValue('FOO', 1, [
+                    new Option('my_enum_value_option', 321)
+                ]),
+                new EnumValue('BAR', 2),
+            ], [
+                new Option('my_enum_option', true),
+            ]),
+
+            new Message('RequestType', []),
+
+            new Message('ResponseType', []),
+
+            new Service('MyService', [
+                new Option('my_service_option', new Identifier('FOO')),
+
+                new Rpc('MyMethod', 'RequestType', 'ResponseType', [
+                    new Option('my_method_option.foo', 567),
+                    new Option('my_method_option.bar', "Some string"),
+                ])
+            ]),
         ];
 
         $this->assertEquals($expected, $this->parser->parse($input));

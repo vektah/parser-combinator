@@ -8,14 +8,14 @@ class Field
     public $type;
     public $identifier;
     public $index;
-    public $default;
+    public $options;
 
-    function __construct($label, $type, $identifier, $index, $default = null)
+    function __construct($label, $type, $identifier, $index, $options = null)
     {
         $this->identifier = $identifier;
         $this->index = $index;
         $this->label = $label;
         $this->type = $type;
-        $this->default = $default;
+        $this->options = $options;
     }
 }

@@ -3,6 +3,9 @@
 namespace vektah\parser_combinator\test\language;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use vektah\parser_combinator\language\proto\EnumValue;
+use vektah\parser_combinator\language\proto\Rpc;
+use vektah\parser_combinator\language\proto\Service;
 use vektah\parser_combinator\language\ProtoParser;
 use vektah\parser_combinator\language\proto\Enum;
 use vektah\parser_combinator\language\proto\Extend;
@@ -28,27 +31,16 @@ class ProtoParserTest extends TestCase
 
     public function testBasicMessage()
     {
-        $messages = $this->parser->parse('message Foo {required int32 foo = 1;}');
-
-        $this->assertEquals(1, count($messages));
-        $message = $messages[0];
-
-        $this->assertEquals('Foo', $message->getName());
-
-        $this->assertEquals(1, count($message->getMembers()));
-        $field = $message->getMembers()[0];
-
-        $this->assertEquals('required', $field->label);
-        $this->assertEquals('int32', $field->type);
-        $this->assertEquals('foo', $field->identifier);
-        $this->assertEquals(1, $field->index);
+        $this->assertEquals([
+            new Message('Foo', [
+                new Field('required', 'int32', 'foo', 1)
+            ])
+        ], $this->parser->parse('message Foo {required int32 foo = 1;}'));
     }
 
     public function testIntTypes()
     {
-        $parser = new ProtoParser();
-
-        $messages = $this->parser->parse('
+        $input = '
             message Foo {
                 required int32 foo = 1;
                 required int32 bar = 0x2;
@@ -56,20 +48,19 @@ class ProtoParserTest extends TestCase
                 required int32 fit = 0xFF;
                 required int32 far = 077;
             }
-        ');
+        ';
 
-        $this->assertEquals(1, count($messages));
-        $message = $messages[0];
+        $expected = [
+            new Message('Foo', [
+                new Field('required', 'int32', 'foo', 1),
+                new Field('required', 'int32', 'bar', 0x2),
+                new Field('required', 'int32', 'baz', 04),
+                new Field('required', 'int32', 'fit', 0xFF),
+                new Field('required', 'int32', 'far', 077),
+            ])
+        ];
 
-        $this->assertEquals('Foo', $message->getName());
-
-        $this->assertEquals(5, count($message->getMembers()));
-
-        $this->assertEquals(new Field('required', 'int32', 'foo', 1), $message->getMembers()[0]);
-        $this->assertEquals(new Field('required', 'int32', 'bar', 2), $message->getMembers()[1]);
-        $this->assertEquals(new Field('required', 'int32', 'baz', 4), $message->getMembers()[2]);
-        $this->assertEquals(new Field('required', 'int32', 'fit', 255), $message->getMembers()[3]);
-        $this->assertEquals(new Field('required', 'int32', 'far', 63), $message->getMembers()[4]);
+        $this->assertEquals($expected, $this->parser->parse($input));
     }
 
     public function testImport()
@@ -95,14 +86,17 @@ class ProtoParserTest extends TestCase
 
     public function testEnum()
     {
-        $this->assertEquals([new Enum('Foo', ['asdf', 'qwer'])], $this->parser->parse('enum Foo {
+        $this->assertEquals([new Enum('Foo', [
+            new EnumValue('asdf', 0),
+            new EnumValue('qwer', 1),
+        ])], $this->parser->parse('enum Foo {
             asdf = 0;
             qwer = 1;
         }'));
 
         $this->assertEquals([new Enum('Foo', [
-            10 => 'asdf',
-            20 => 'qwer'
+            new EnumValue('asdf', 10),
+            new EnumValue('qwer', 20),
         ])], $this->parser->parse('enum Foo {
             asdf = 10;
             qwer = 20;
@@ -127,7 +121,10 @@ class ProtoParserTest extends TestCase
             new Message('Bar', [
                 new Field('required', 'MessageType', 'type', 0),
                 new Field('required', 'bytes', 'data', 1),
-                new Enum('Foo', ['asdf', 'qwer'])
+                new Enum('Foo', [
+                    new EnumValue('asdf', 0),
+                    new EnumValue('qwer', 1)
+                ])
             ])
         ];
 
@@ -157,5 +154,48 @@ class ProtoParserTest extends TestCase
         $this->assertEquals([new Package('foobar')], $this->parser->parse('
             package foobar;
         '));
+    }
+
+    public function testService()
+    {
+        $this->assertEquals([new Service('Foo', [
+            new Rpc('Test', 'TestRequest', 'TestResponse')
+        ])], $this->parser->parse('
+            service Foo {
+                rpc Test (TestRequest) returns (TestResponse);
+            }
+        '));
+    }
+
+    public function testDefaultFeildOption()
+    {
+        $this->assertEquals([new Message('Foo', [
+            new Field('required', 'int32', 'bar', 123, [
+                new Option('default', 555),
+            ])
+        ])], $this->parser->parse('
+            message Foo {
+                required int32 bar = 123 [default = 555];
+            }
+        '));
+    }
+
+    public function testFieldOption()
+    {
+        $this->assertEquals([new Message('Foo', [
+            new Field('required', 'int32', 'bar', 123, [
+                new Option('asdf', 555),
+                new Option('hjkl', 666)
+            ])
+        ])], $this->parser->parse('
+            message Foo {
+                required int32 bar = 123 [(asdf) = 555, (hjkl) = 666];
+            }
+        '));
+    }
+
+    public function testEmptyMessage()
+    {
+        $this->assertEquals([new Message('Foo', [])], $this->parser->parse('message Foo{}'));
     }
 }

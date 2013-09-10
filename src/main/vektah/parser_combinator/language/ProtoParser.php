@@ -11,6 +11,7 @@ use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
 use vektah\parser_combinator\formatter\Ignore;
 use vektah\parser_combinator\language\proto\Enum;
+use vektah\parser_combinator\language\proto\EnumValue;
 use vektah\parser_combinator\language\proto\Extend;
 use vektah\parser_combinator\language\proto\Extensions;
 use vektah\parser_combinator\language\proto\Field;
@@ -19,6 +20,8 @@ use vektah\parser_combinator\language\proto\Import;
 use vektah\parser_combinator\language\proto\Message;
 use vektah\parser_combinator\language\proto\Option;
 use vektah\parser_combinator\language\proto\Package;
+use vektah\parser_combinator\language\proto\Rpc;
+use vektah\parser_combinator\language\proto\Service;
 use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\EofParser;
@@ -45,10 +48,11 @@ class ProtoParser
             new CharRangeParser(['a' => 'z', 'A' => 'Z', '_' => '_'], 1),
             new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9', '_' => '_', '.' => '.']),
         ]));
+
         $positive = new PositiveMatch();
 
         $comment = new Ignore(new Sequence(['//', new RegexParser('/^.*/')]));
-        $ws = new Sequence([new WhitespaceParser(), new Choice([new Many([new Sequence([$comment, new WhitespaceParser()])]), ''])]);
+        $ws = new Ignore(new Sequence([new WhitespaceParser(), new Choice([new Many([new Sequence([$comment, new WhitespaceParser()])]), ''])]));
 
         // Literals
         $bool = new Closure(new Choice(['true', 'false']), function($data) {
@@ -63,7 +67,7 @@ class ProtoParser
         $string = new StringLiteral();
         $float = new FloatLiteral(false);
 
-        $literal = new Choice([$int, $float, $bool, $string, $null]);
+        $literal = new Choice([$float, $int, $bool, $string, $null]);
 
         $label = new Choice(['required', 'optional', 'repeated']);
         $type = new Choice(['double', 'float', 'int32', 'int64', 'uint32', 'uint64', 'sint32', 'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64', 'bool', 'string', 'bytes' /*, $userType */]);
@@ -75,23 +79,52 @@ class ProtoParser
             })
         ]);
 
+        $default_field_option = new Closure(new Sequence(['default', $positive, $ws, '=', $ws, $var, $ws]), function($data) {
+            return new Option('default', $data[2]);
+        });
+
+        $extended_field_option = new Closure(new Sequence([
+            '(', $positive, $ws,
+            $identifier, $ws,
+            ')', $ws,
+            new Choice([new Concatenate(new Sequence(['.', $positive, $identifier])), '']), $ws,
+            '=', $ws,
+            $var, $ws
+        ]), function($data) {
+            return new Option($data[1] . $data[3], $data[5]);
+        });
+
+        $field_options = new Closure(new Sequence([
+            '[', $positive, $ws,
+            new Choice([$default_field_option, $extended_field_option, '']),
+            new Many([new Sequence([
+                ',', $ws,
+                new Choice([$default_field_option, $extended_field_option, '']), $ws
+            ])]),
+            ']', $ws
+        ]), function($data) {
+            $result = [];
+
+            if($data[1]) {
+                $result[] = $data[1];
+            }
+            if (isset($data[2]) && is_array($data[2])) {
+                foreach ($data[2] as $option) {
+                    $result[] = $option[1];
+                }
+            }
+
+            return $result;
+        });
+
         $field = new Closure(new Sequence([
-            $label,
-            $positive,
-            $ws,
-            new Choice([$type, $identifier]),
-            $ws,
-            $identifier,
-            $ws,
-            new StringParser('=', true, false),
-            $ws,
-            $int,
-            $ws,
-            new Closure(new Choice([new Sequence(['[', $ws, 'default', $positive, $ws, '=', $ws, $var, $ws, ']', $ws]), '']), function($data) {
-                return isset($data[3]) ? $data[3] : null;
-            }),
-            new StringParser(';', true, false),
-            $ws
+            $label, $positive, $ws,
+            new Choice([$type, $identifier]), $ws,
+            $identifier, $ws,
+            new StringParser('=', true, false), $ws,
+            $int, $ws,
+            new Choice([$field_options, '']),
+            new StringParser(';', true, false), $ws
         ]), function($data) {
             $default = null;
             if(isset($data[4])) {
@@ -130,54 +163,90 @@ class ProtoParser
         });
 
         $option = new Closure(new Sequence([
-            'option',
-            $positive,
-            $ws,
+            'option', $positive, $ws,
             new Concatenate(new Sequence([
-                new CharParser('(', 0, 1, false),
-                $ws,
-                new CharParser('.', 0, 1),
-                $ws,
-                $identifier,
-                $ws,
-                new CharParser(')', 0, 1, false),
-            ])),
-            $ws,
-            '=',
-            $ws,
-            $literal,
-            $ws,
-            ';',
-            $ws
+                new CharParser('(', 0, 1, false), $ws,
+                new CharParser('.', 0, 1), $ws,
+                $identifier, $ws,
+                new CharParser(')', 0, 1, false), $ws,
+            ])), $ws,
+            new Choice([new Concatenate(new Sequence(['.', $ws, $identifier, $ws])), '']),
+            '=', $ws,
+            $var, $ws,
+            ';', $ws
         ]), function($data) {
-            return new Option($data[1], $data[3]);
+            return new Option($data[1] . $data[2], $data[4]);
+        });
+
+
+        $rpc = new Closure(new Sequence([
+            'rpc', $positive, $ws,
+            $identifier, $ws,
+            '(', $ws,
+            $identifier, $ws,
+            ')', $ws,
+            'returns', $ws,
+            '(', $ws,
+            $identifier, $ws,
+            ')', $ws,
+            new Choice([
+                new Sequence([
+                    '{', $positive, $ws,
+                    new Many([$option]), $ws,
+                    '}', $ws,
+                ]),
+                ';', $ws,
+            ])
+        ]), function($data) {
+            return new Rpc($data[1], $data[3], $data[7]);
+        });
+
+        $service = new Closure(new Sequence([
+            'service', $positive, $ws,
+            $identifier, $ws,
+            '{', $ws,
+            new Many([$rpc, $option]), $ws,
+            '}', $ws
+        ]), function($data) {
+            return new Service($data[1], $data[3]);
         });
 
         $enumField = new Closure(new Sequence([
-            $identifier,
-            $ws,
-            '=',
-            $ws,
-            $int,
-            $ws,
-            ';',
-            $ws,
+            $identifier, $ws,
+            '=', $ws,
+            $int, $ws,
+            new Choice([$field_options, '']),
+            ';', $ws,
         ]), function($data) {
-            return [$data[0], $data[2]];
+            if (is_array($data[3])) {
+                return new EnumValue($data[0], $data[2], $data[3]);
+            }
+            return new EnumValue($data[0], $data[2]);
         });
 
         $enum = new Closure(new Sequence(['enum', $positive, $ws, $identifier, $ws,  '{', $ws, new Many([$option, $enumField]), $ws, '}', $ws]), function($data) {
-            $keyed = [];
+            $fields = [];
+            $options = [];
 
-            foreach ($data[3] as $entry) {
-                $keyed[$entry[1]] = $entry[0];
+            foreach ($data[3] as $datum) {
+                if ($datum instanceof Option) {
+                    $options[] = $datum;
+                } else {
+                    $fields[] = $datum;
+                }
             }
-            return new Enum($data[1], $keyed);
+            return new Enum($data[1], $fields, $options);
         });
 
-        $definition = new Choice([$field, $enum, $extensions, $extend]);
+        $definition = new Choice([$field, $enum, $extensions, $extend, $option]);
 
-        $message = new Closure(new Sequence(['message', $positive, $ws, $identifier, $ws, '{', $ws, new Many([$definition]), $ws, '}', $ws]), function($data) {
+        $message = new Closure(new Sequence([
+            'message', $positive, $ws,
+            $identifier, $ws,
+            '{', $ws,
+            new Many([$definition]), $ws,
+            '}', $ws
+        ]), function($data) {
             $message = new Message($data[1], $data[3]);
 
             return $message;
@@ -185,7 +254,7 @@ class ProtoParser
 
         $definition->append($message);
 
-        $this->rootParser = new Closure(new Sequence([$ws, new Many([$option, $enum, $package, $import, $message, $extend]), $ws, new EofParser()]), function($data) {
+        $this->rootParser = new Closure(new Sequence([$ws, new Many([$option, $enum, $package, $import, $message, $extend, $service]), $ws, new EofParser()]), function($data) {
             return $data[0];
         });
     }

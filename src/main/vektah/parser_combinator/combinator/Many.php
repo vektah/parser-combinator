@@ -69,10 +69,6 @@ class Many extends Choice
             return Result::error('At ' . $input->getPositionDescription() . ": Expected {$this->min} elements, but found $count", $isPositive);
         }
 
-        if ($aggregatedResult === []) {
-            return Result::nonCapturingMatch($isPositive);
-        } else {
-            return Result::match($aggregatedResult, $isPositive);
-        }
+        return Result::match($aggregatedResult, $isPositive);
     }
 }

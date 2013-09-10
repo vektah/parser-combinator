@@ -2,15 +2,15 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class Enum {
+class EnumValue {
     public $name;
-    public $values;
+    public $id;
     public $options;
 
-    function __construct($name, array $array, array $options = [])
+    public function __construct($name, $id, array $options = [])
     {
         $this->name = $name;
-        $this->values = $array;
+        $this->id = $id;
         $this->options = $options;
     }
 }
