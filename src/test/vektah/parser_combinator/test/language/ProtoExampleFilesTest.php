@@ -71,7 +71,7 @@ class ProtoExampleFilesTest extends TestCase
             ])
         ];
 
-        $this->assertEquals($expected, $this->parser->parse($input));
+        $this->assertEquals($expected, $this->parser->parse($input)->elements);
     }
 
     public function testSample2()
@@ -130,7 +130,7 @@ class ProtoExampleFilesTest extends TestCase
             ])
         ];
 
-        $this->assertEquals($expected, $this->parser->parse($input));
+        $this->assertEquals($expected, $this->parser->parse($input)->elements);
     }
 
     public function testSample3()
@@ -257,6 +257,6 @@ class ProtoExampleFilesTest extends TestCase
             ]),
         ];
 
-        $this->assertEquals($expected, $this->parser->parse($input));
+        $this->assertEquals($expected, $this->parser->parse($input)->elements);
     }
 }

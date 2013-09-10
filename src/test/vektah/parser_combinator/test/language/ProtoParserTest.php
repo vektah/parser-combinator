@@ -35,7 +35,7 @@ class ProtoParserTest extends TestCase
             new Message('Foo', [
                 new Field('required', 'int32', 'foo', 1)
             ])
-        ], $this->parser->parse('message Foo {required int32 foo = 1;}'));
+        ], $this->parser->parse('message Foo {required int32 foo = 1;}')->elements);
     }
 
     public function testIntTypes()
@@ -60,12 +60,12 @@ class ProtoParserTest extends TestCase
             ])
         ];
 
-        $this->assertEquals($expected, $this->parser->parse($input));
+        $this->assertEquals($expected, $this->parser->parse($input)->elements);
     }
 
     public function testImport()
     {
-        $this->assertEquals([new Import('asdf')], $this->parser->parse('import "asdf";'));
+        $this->assertEquals([new Import('asdf')], $this->parser->parse('import "asdf";')->elements);
     }
 
     public function testComment()
@@ -74,14 +74,14 @@ class ProtoParserTest extends TestCase
             import "asdf";
             // Ignore meeee
             import "hjkl";
-        '));
+        ')->elements);
     }
 
     public function testOption()
     {
-        $this->assertEquals([new Option('hello_world', true)], $this->parser->parse('option (hello_world) = true;'));
-        $this->assertEquals([new Option('hello_world', 'OK')], $this->parser->parse('option hello_world = "OK";'));
-        $this->assertEquals([new Option('.hello_world', 123)], $this->parser->parse('option .hello_world = 123;'));
+        $this->assertEquals([new Option('hello_world', true)], $this->parser->parse('option (hello_world) = true;')->elements);
+        $this->assertEquals([new Option('hello_world', 'OK')], $this->parser->parse('option hello_world = "OK";')->elements);
+        $this->assertEquals([new Option('.hello_world', 123)], $this->parser->parse('option .hello_world = 123;')->elements);
     }
 
     public function testEnum()
@@ -92,7 +92,7 @@ class ProtoParserTest extends TestCase
         ])], $this->parser->parse('enum Foo {
             asdf = 0;
             qwer = 1;
-        }'));
+        }')->elements);
 
         $this->assertEquals([new Enum('Foo', [
             new EnumValue('asdf', 10),
@@ -100,7 +100,7 @@ class ProtoParserTest extends TestCase
         ])], $this->parser->parse('enum Foo {
             asdf = 10;
             qwer = 20;
-        }'));
+        }')->elements);
     }
 
     public function testCombination()
@@ -128,7 +128,7 @@ class ProtoParserTest extends TestCase
             ])
         ];
 
-        $this->assertEquals($expected, $this->parser->parse($input));
+        $this->assertEquals($expected, $this->parser->parse($input)->elements);
     }
 
     public function testExtensions()
@@ -137,7 +137,7 @@ class ProtoParserTest extends TestCase
             message Foo {
                 extensions 10 to max;
             }
-        '));
+        ')->elements);
     }
 
     public function testExtend()
@@ -146,14 +146,14 @@ class ProtoParserTest extends TestCase
             extend Foo {
                 optional int32 foo = 10;
             }
-        '));
+        ')->elements);
     }
 
     public function testPackage()
     {
         $this->assertEquals([new Package('foobar')], $this->parser->parse('
             package foobar;
-        '));
+        ')->elements);
     }
 
     public function testService()
@@ -164,7 +164,7 @@ class ProtoParserTest extends TestCase
             service Foo {
                 rpc Test (TestRequest) returns (TestResponse);
             }
-        '));
+        ')->elements);
     }
 
     public function testDefaultFeildOption()
@@ -177,7 +177,7 @@ class ProtoParserTest extends TestCase
             message Foo {
                 required int32 bar = 123 [default = 555];
             }
-        '));
+        ')->elements);
     }
 
     public function testFieldOption()
@@ -191,11 +191,52 @@ class ProtoParserTest extends TestCase
             message Foo {
                 required int32 bar = 123 [(asdf) = 555, (hjkl) = 666];
             }
-        '));
+        ')->elements);
     }
 
     public function testEmptyMessage()
     {
-        $this->assertEquals([new Message('Foo', [])], $this->parser->parse('message Foo{}'));
+        $this->assertEquals([new Message('Foo', [])], $this->parser->parse('message Foo{}')->elements);
+    }
+
+    public function testRecurse()
+    {
+        $out = $this->parser->parse('
+            message Bar {
+                required MessageType type = 0;
+                required bytes data = 1;
+
+                enum Foo {
+                    asdf = 0;
+                    qwer = 1;
+                }
+            }
+        ');
+
+        $flattened = [];
+
+        $out->traverse(function ($element) use (&$flattened) {
+            $flattened[] = $element;
+        });
+
+        $this->assertEquals([
+            new Message('Bar', [
+                new Field('required', 'MessageType', 'type', 0),
+                new Field('required', 'bytes', 'data', 1),
+
+                new Enum('Foo', [
+                    new EnumValue('asdf', 0),
+                    new EnumValue('qwer', 1),
+                ])
+            ]),
+            new Field('required', 'MessageType', 'type', 0),
+            new Field('required', 'bytes', 'data', 1),
+            new Enum('Foo', [
+                new EnumValue('asdf', 0),
+                new EnumValue('qwer', 1),
+            ]),
+            new EnumValue('asdf', 0),
+            new EnumValue('qwer', 1),
+        ], $flattened);
     }
 }

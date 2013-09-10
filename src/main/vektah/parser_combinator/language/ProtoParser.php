@@ -15,6 +15,7 @@ use vektah\parser_combinator\language\proto\EnumValue;
 use vektah\parser_combinator\language\proto\Extend;
 use vektah\parser_combinator\language\proto\Extensions;
 use vektah\parser_combinator\language\proto\Field;
+use vektah\parser_combinator\language\proto\File;
 use vektah\parser_combinator\language\proto\Identifier;
 use vektah\parser_combinator\language\proto\Import;
 use vektah\parser_combinator\language\proto\Message;
@@ -255,10 +256,13 @@ class ProtoParser
         $definition->append($message);
 
         $this->rootParser = new Closure(new Sequence([$ws, new Many([$option, $enum, $package, $import, $message, $extend, $service]), $ws, new EofParser()]), function($data) {
-            return $data[0];
+            return new File($data[0]);
         });
     }
 
+    /**
+     * @return File
+     */
     public function parse($input)
     {
         $result = $this->rootParser->parse(new Input($input));
