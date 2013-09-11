@@ -9,6 +9,7 @@ class Field
     public $identifier;
     public $index;
     public $options;
+    public $default;
 
     function __construct($label, $type, $identifier, $index, $options = null)
     {
@@ -17,5 +18,13 @@ class Field
         $this->label = $label;
         $this->type = $type;
         $this->options = $options;
+
+        if (is_array($options)) {
+            foreach ($options as $option) {
+                if ($option->identifier == 'default') {
+                    $this->default = $option->value;
+                }
+            }
+        }
     }
 }

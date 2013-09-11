@@ -4,9 +4,16 @@ namespace vektah\parser_combinator\language\proto;
 
 class Message
 {
+    /** @var string */
     public $name;
+
+    /** @var array */
     public $members;
+
+    /** @var Field[] */
     public $fields = [];
+
+    /** @var Option[] */
     public $options = [];
 
     public function __construct($name, $members)
