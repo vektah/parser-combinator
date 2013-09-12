@@ -2,7 +2,8 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class Identifier {
+class Identifier
+{
     public $name;
 
     public function __construct($name)

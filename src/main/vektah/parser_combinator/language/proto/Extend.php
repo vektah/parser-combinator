@@ -2,7 +2,8 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class Extend {
+class Extend
+{
     public $name;
     public $members;
 

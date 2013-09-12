@@ -11,7 +11,7 @@ class Field
     public $options;
     public $default;
 
-    function __construct($label, $type, $identifier, $index, $options = null)
+    public function __construct($label, $type, $identifier, $index, $options = null)
     {
         $this->identifier = $identifier;
         $this->index = $index;

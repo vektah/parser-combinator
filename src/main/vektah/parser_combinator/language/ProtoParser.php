@@ -106,7 +106,7 @@ class ProtoParser
         ]), function($data) {
             $result = [];
 
-            if($data[1]) {
+            if ($data[1]) {
                 $result[] = $data[1];
             }
             if (isset($data[2]) && is_array($data[2])) {
@@ -128,7 +128,7 @@ class ProtoParser
             new StringParser(';', true, false), $ws
         ]), function($data) {
             $default = null;
-            if(isset($data[4])) {
+            if (isset($data[4])) {
                 $default = $data[4];
             }
             return new Field($data[0], $data[1], $data[2], $data[3], $default);
@@ -221,7 +221,7 @@ class ProtoParser
             return new EnumValue($data[0], $data[2]);
         });
 
-        $enum = new Closure(new Sequence(['enum', $positive, $ws, $identifier, $ws,  '{', $ws, new Many([$option, $enumField]), $ws, '}', $ws]), function($data) {
+        $enum = new Closure(new Sequence(['enum', $positive, $ws, $identifier, $ws, '{', $ws, new Many([$option, $enumField]), $ws, '}', $ws]), function($data) {
             $fields = [];
             $options = [];
 

@@ -2,7 +2,8 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class EnumValue {
+class EnumValue
+{
     public $name;
     public $id;
     public $options;

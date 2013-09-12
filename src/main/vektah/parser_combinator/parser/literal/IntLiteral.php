@@ -28,7 +28,7 @@ class IntLiteral implements Parser
 {
     private $root;
 
-    function __construct($octal = true, $hex = true)
+    public function __construct($octal = true, $hex = true)
     {
         // Order here is important, if hex fails to match try oct, otherwise its an int.
         $this->root = new Choice();

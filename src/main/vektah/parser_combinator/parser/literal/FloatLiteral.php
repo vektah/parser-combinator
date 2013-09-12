@@ -24,7 +24,7 @@ class FloatLiteral implements Parser
 {
     private $root;
 
-    function __construct($allowSuffix = true)
+    public function __construct($allowSuffix = true)
     {
         if ($allowSuffix) {
             $suffix = new Choice(['', 'f']);

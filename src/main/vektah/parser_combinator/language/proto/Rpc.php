@@ -8,7 +8,7 @@ class Rpc
     public $request;
     public $response;
 
-    function __construct($method, $request, $response)
+    public function __construct($method, $request, $response)
     {
         $this->response = $response;
         $this->method = $method;

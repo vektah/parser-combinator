@@ -25,10 +25,9 @@ class JsonParser
     {
         $whitespace = new WhitespaceParser();
         $left_brace = new StringParser('{', true, false);
-        $right_brace = new StringParser('}', true ,false);
+        $right_brace = new StringParser('}', true, false);
         $left_bracket = new StringParser('[', true, false);
         $right_bracket = new StringParser(']', true, false);
-        $double_quote = new StringParser('"', true, false);
         $colon = new StringParser(':', true, false);
         $comma = new StringParser(',', true, false);
 

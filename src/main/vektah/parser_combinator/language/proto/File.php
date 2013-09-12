@@ -2,7 +2,8 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class File {
+class File
+{
     public $elements;
 
     public function __construct(array $elements)

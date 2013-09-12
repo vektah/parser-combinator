@@ -1,7 +1,6 @@
 <?php
 namespace vektah\parser_combinator\exception;
 
-
 use Exception;
 
 class ParseException extends Exception

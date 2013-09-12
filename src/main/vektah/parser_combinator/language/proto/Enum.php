@@ -2,7 +2,8 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class Enum {
+class Enum
+{
     /** @var string */
     public $name;
 
@@ -12,7 +13,7 @@ class Enum {
     /** @var Option[] */
     public $options;
 
-    function __construct($name, array $array, array $options = [])
+    public function __construct($name, array $array, array $options = [])
     {
         $this->name = $name;
         $this->values = $array;

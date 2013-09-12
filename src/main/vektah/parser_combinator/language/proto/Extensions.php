@@ -2,7 +2,8 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class Extensions {
+class Extensions
+{
     public $min;
     public $max;
 

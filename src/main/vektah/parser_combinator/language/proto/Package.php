@@ -2,11 +2,12 @@
 
 namespace vektah\parser_combinator\language\proto;
 
-class Package {
+class Package
+{
     public $name;
     public $elements;
 
-    function __construct($name, $elements = [])
+    public function __construct($name, $elements = [])
     {
         $this->name = $name;
         $this->elements = $elements;

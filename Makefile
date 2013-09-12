@@ -29,8 +29,7 @@ typefix: depends
 
 style:
 	echo " --- Style Checks ---"
-	# Currently only checking src/test as src/main still needs a bit of work
-	phpcs --standard=PSR2 --warning-severity=6 src/test
+	$(PHPCS_BIN) --standard=vendor/vektah/psr2 src
 
 test: lint depends
 	echo " --- Unit tests ---"
