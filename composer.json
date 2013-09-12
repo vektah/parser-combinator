@@ -2,6 +2,15 @@
     "name" : "vektah/parser-combinator",
     "keywords" : ["parser", "lexer", "combinator", "parser combinator"],
     "homepage" : "https://github.com/Vektah/parser-combinator",
+	"license" : "BSD-2-Clause",
+	"authors" : [
+		{
+			"name": "Adam Scarr",
+			"email": "scarr.adam@gmail.com",
+			"homepage": "http://github.com/Vektah",
+			"role": "Developer"
+		}
+	],
 
     "autoload": {
         "psr-0": {
@@ -10,7 +19,7 @@
     },
 
     "require" : {
-        "php" : ">=5.3.0"
+        "php" : ">=5.4.0"
     },
 
     "require-dev": {
