@@ -9,7 +9,6 @@ use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\formatter\Closure;
-use vektah\parser_combinator\formatter\Flatten;
 use vektah\parser_combinator\parser\EofParser;
 use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;

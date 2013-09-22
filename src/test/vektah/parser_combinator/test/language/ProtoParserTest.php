@@ -3,11 +3,9 @@
 namespace vektah\parser_combinator\test\language;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use vektah\parser_combinator\language\proto\EnumValue;
-use vektah\parser_combinator\language\proto\Rpc;
-use vektah\parser_combinator\language\proto\Service;
 use vektah\parser_combinator\language\ProtoParser;
 use vektah\parser_combinator\language\proto\Enum;
+use vektah\parser_combinator\language\proto\EnumValue;
 use vektah\parser_combinator\language\proto\Extend;
 use vektah\parser_combinator\language\proto\Extensions;
 use vektah\parser_combinator\language\proto\Field;
@@ -16,6 +14,8 @@ use vektah\parser_combinator\language\proto\Import;
 use vektah\parser_combinator\language\proto\Message;
 use vektah\parser_combinator\language\proto\Option;
 use vektah\parser_combinator\language\proto\Package;
+use vektah\parser_combinator\language\proto\Rpc;
+use vektah\parser_combinator\language\proto\Service;
 
 class ProtoParserTest extends TestCase
 {
