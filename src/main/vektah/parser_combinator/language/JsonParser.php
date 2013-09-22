@@ -23,7 +23,7 @@ class JsonParser
 
     public function __construct()
     {
-        $whitespace = new WhitespaceParser();
+        $ws = new WhitespaceParser();
         $left_brace = new StringParser('{', true, false);
         $right_brace = new StringParser('}', true, false);
         $left_bracket = new StringParser('[', true, false);
@@ -48,19 +48,19 @@ class JsonParser
 
         $object = new Closure(new Sequence(
             [
-                $whitespace,
+                $ws,
                 $left_brace,
-                $whitespace,
+                $ws,
                 new Many(
                     [
                         new Sequence(
                             [
                                 $string,
-                                $whitespace,
+                                $ws,
                                 $colon,
-                                $whitespace,
+                                $ws,
                                 $value,
-                                $whitespace
+                                $ws
                             ]
                         )
                     ],
@@ -72,19 +72,19 @@ class JsonParser
                         new Sequence(
                             [
                                 $comma,
-                                $whitespace,
+                                $ws,
                                 $string,
-                                $whitespace,
+                                $ws,
                                 $colon,
-                                $whitespace,
+                                $ws,
                                 $value
                             ]
                         ),
                     ]
                 ),
-                $whitespace,
+                $ws,
                 $right_brace,
-                $whitespace
+                $ws
             ]
         ), function ($data) {
             $result = [];
@@ -97,22 +97,33 @@ class JsonParser
 
             return $result;
         });
+
         $value->append($object);
-        $array = new Flatten(
-            new Sequence(
-                [
-                    $whitespace,
-                    $left_bracket,
-                    $whitespace,
-                    // First one has no comma
-                    new Many([$value], 0, 1),
-                    new Many([new Sequence([$whitespace, $comma, $whitespace, $value])]),
-                    $whitespace,
-                    $right_bracket,
-                    $whitespace
-                ]
-            )
-        );
+        $array = new Closure(new Sequence([
+            $ws,
+            $left_bracket,
+            $ws,
+            // First one has no comma
+            new Many([$value], 0, 1),
+            new Many([new Sequence([$ws, $comma, $ws, $value])]),
+            $ws,
+            $right_bracket,
+            $ws
+        ]), function($data) {
+            $result = [];
+
+            if (is_array($data[0])) {
+                $result[] = $data[0][0];
+            }
+
+            if (is_array($data[1])) {
+                foreach ($data[1] as $value) {
+                    $result[] = $value[0];
+                }
+            }
+
+            return $result;
+        });
         $value->append($array);
 
         $this->rootParser = new Closure(new Sequence([$value, new EofParser()]), function($data) {

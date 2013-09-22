@@ -9,6 +9,11 @@ class CharRangeParser extends CharParser
         $chars = '';
 
         foreach ($ranges as $first => $last) {
+            // Use non numeric keys as chars directly.
+            if (!is_string($first)) {
+                $chars .= $last;
+            }
+
             for ($i = ord($first); $i <= ord($last); $i++) {
                 $chars .= chr($i);
             }

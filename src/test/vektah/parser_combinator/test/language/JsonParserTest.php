@@ -20,6 +20,7 @@ class JsonParserTest extends TestCase
         $this->assertSame(['asdf', 'hjkl'], $parser->parse(new Input('["asdf", "hjkl"]')));
         $this->assertSame(['asdf' => 'hjkl'], $parser->parse(new Input('{"asdf": "hjkl"}')));
         $this->assertSame(['asdf' => 'hjkl', 'a' => 'b'], $parser->parse(new Input('{"asdf": "hjkl", "a": "b"}')));
+        $this->assertSame([['asdf' => 'asdf', 'qwer' => 'qwer']], $parser->parse(new Input('[{"asdf": "asdf", "qwer": "qwer"}]')));
     }
 
     public function testComposerJson()
