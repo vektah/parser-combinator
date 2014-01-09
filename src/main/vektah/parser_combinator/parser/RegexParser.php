@@ -8,7 +8,7 @@ use vektah\parser_combinator\Result;
 /**
  * Look for a matching regex at the given offset
  */
-class RegexParser implements Parser
+class RegexParser extends Parser
 {
     private $expression;
     private $capture;

@@ -3,8 +3,8 @@
 namespace vektah\parser_combinator\test\combinator;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Many;
+use vektah\parser_combinator\Input;
 use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\StringParser;
@@ -13,7 +13,7 @@ class ManyTest extends TestCase
 {
     public function testSingle()
     {
-        $many = new Many(['asdf']);
+        $many = new Many('asdf');
 
         $this->assertEquals(['asdf'], $many->parse(new Input('asdf'))->data);
         $this->assertEquals(['asdf', 'asdf'], $many->parse(new Input('asdfasdf'))->data);
@@ -21,7 +21,7 @@ class ManyTest extends TestCase
 
     public function testMultiple()
     {
-        $many = new Many(['asdf', 'hjkl']);
+        $many = new Many('asdf', 'hjkl');
 
         $this->assertEquals(['hjkl'], $many->parse(new Input('hjkl'))->data);
         $this->assertEquals(['hjkl', 'asdf'], $many->parse(new Input('hjklasdf'))->data);

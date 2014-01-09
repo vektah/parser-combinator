@@ -24,7 +24,7 @@ use vektah\parser_combinator\parser\StringParser;
  *  - 090 as decimal
  *  - 0xFF as hex
  */
-class IntLiteral implements Parser
+class IntLiteral extends Parser
 {
     private $root;
 

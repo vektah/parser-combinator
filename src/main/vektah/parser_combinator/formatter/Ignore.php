@@ -6,7 +6,7 @@ use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
 use vektah\parser_combinator\parser\Parser;
 
-class Ignore implements Parser
+class Ignore extends Parser
 {
     private $parser;
 

@@ -8,7 +8,7 @@ use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\StringParser;
 
-abstract class Combinator implements Parser
+abstract class Combinator extends Parser
 {
     /** @var callable */
     public $formatCallback;
@@ -18,8 +18,12 @@ abstract class Combinator implements Parser
      */
     private $parsers;
 
-    public function __construct(array $parsers = [])
+    public function __construct($parsers = null)
     {
+        if (!is_array($parsers)) {
+            $parsers = func_get_args();
+        }
+
         foreach ($parsers as $id => $parser) {
             if (is_string($parser)) {
                 $parsers[$id] = new StringParser($parser);
@@ -45,6 +49,10 @@ abstract class Combinator implements Parser
      */
     public function parse(Input $input)
     {
+        if (self::getParserStack()) {
+            file_put_contents('/tmp/log', self::getParserStack() . "\n", FILE_APPEND);
+        }
+
         $result = $this->combine($input);
         return $result;
     }

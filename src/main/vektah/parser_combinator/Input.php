@@ -171,4 +171,9 @@ class Input
     {
         return $this->offset >= $this->strlen;
     }
+
+    public function strlen()
+    {
+        return $this->strlen;
+    }
 }

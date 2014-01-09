@@ -4,12 +4,15 @@ namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
+use vektah\parser_combinator\parser\SingletonTrait;
 
 /**
  * Does not consume any input, but asserts that if this point is reached no back tracking is allowed.
  */
-class PositiveMatch implements Parser
+class PositiveMatch extends Parser
 {
+    use SingletonTrait;
+
     /**
      * Parse the given input
      *

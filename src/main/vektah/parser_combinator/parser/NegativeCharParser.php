@@ -9,7 +9,7 @@ use vektah\parser_combinator\Result;
  * Matches any sequence of chars not containing the ones given, generally preferred over regex for performance reasons
  * (regex requires a copy of the whole remaining buffer)
  */
-class NegativeCharParser implements Parser
+class NegativeCharParser extends Parser
 {
     private $raw_chars;
     private $chars;

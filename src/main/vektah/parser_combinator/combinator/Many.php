@@ -12,12 +12,24 @@ class Many extends Choice
     private $min;
     private $max;
 
-    public function __construct(array $parsers, $min = 0, $max = null)
+    public function __construct($parsers = null, $min = 0, $max = null)
     {
-        parent::__construct($parsers);
+        if (!is_array($parsers)) {
+            $parsers = func_get_args();
+        } else {
+            if (!is_numeric($min) && !is_null($min)) {
+                throw new GrammarException('Min must be numeric');
+            }
 
-        $this->min = $min;
-        $this->max = $max;
+            if (!is_numeric($max) && !is_null($max)) {
+                throw new GrammarException('Max must be numeric');
+            }
+
+            $this->min = $min;
+            $this->max = $max;
+        }
+
+        parent::__construct($parsers);
     }
 
     public function combine(Input $input)

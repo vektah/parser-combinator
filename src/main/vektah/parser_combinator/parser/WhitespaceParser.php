@@ -2,13 +2,17 @@
 
 namespace vektah\parser_combinator\parser;
 
+use vektah\parser_combinator\parser\SingletonTrait;
+
 /**
  * Matches zero or more whitespace characters.
  */
 class WhitespaceParser extends CharParser
 {
-    public function __construct()
+    use SingletonTrait;
+
+    public function __construct($min = 0, $capturing = false)
     {
-        parent::__construct("\n\t\r ", 0, null, false);
+        parent::__construct("\n\t\r ", $min, null, $capturing);
     }
 }

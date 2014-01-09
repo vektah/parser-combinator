@@ -4,9 +4,11 @@ namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
+use vektah\parser_combinator\parser\SingletonTrait;
 
-class EofParser implements Parser
+class EofParser extends Parser
 {
+    use SingletonTrait;
 
     public function parse(Input $input)
     {

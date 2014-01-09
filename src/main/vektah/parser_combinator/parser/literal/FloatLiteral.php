@@ -20,7 +20,7 @@ use vektah\parser_combinator\parser\PositiveMatch;
  *  OPTIONALLY
  *  - 0.1234f
  */
-class FloatLiteral implements Parser
+class FloatLiteral extends Parser
 {
     private $root;
 

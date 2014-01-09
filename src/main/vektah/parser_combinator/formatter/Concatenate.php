@@ -5,7 +5,7 @@ namespace vektah\parser_combinator\formatter;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\Parser;
 
-class Concatenate implements Parser
+class Concatenate extends Parser
 {
     private $parser;
     private $glue;

@@ -12,7 +12,7 @@ use vektah\parser_combinator\parser\NegativeCharParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\StringParser;
 
-class StringLiteral implements Parser
+class StringLiteral extends Parser
 {
 
     private $root;

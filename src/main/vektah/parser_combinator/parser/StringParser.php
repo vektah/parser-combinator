@@ -8,7 +8,7 @@ use vektah\parser_combinator\Result;
 /**
  * Parse a single static string. String matching is quite efficient, but returning a result will copy that substring.
  */
-class StringParser implements Parser
+class StringParser extends Parser
 {
     private $needle;
     private $case_sensitive;

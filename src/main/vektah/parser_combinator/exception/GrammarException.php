@@ -4,6 +4,7 @@ namespace vektah\parser_combinator\exception;
 
 
 use Exception;
+use vektah\parser_combinator\parser\Parser;
 
 class GrammarException extends Exception
 {
@@ -13,4 +14,8 @@ class GrammarException extends Exception
      * @see http://www.php.net/manual/en/language.oop5.basic.php#language.oop5.basic.class.class
      */
     const _CLASS = __CLASS__;
+
+    public function __construct($message) {
+        parent::__construct(Parser::getParserStack() . ': ' . $message);
+    }
 }

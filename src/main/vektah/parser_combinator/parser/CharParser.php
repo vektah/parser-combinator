@@ -2,6 +2,7 @@
 
 namespace vektah\parser_combinator\parser;
 
+use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
 
@@ -9,7 +10,7 @@ use vektah\parser_combinator\Result;
  * Matches any sequence of chars, generally preferred over regex for performance reasons (regex requires a copy
  * of the whole remaining buffer)
  */
-class CharParser implements Parser
+class CharParser extends Parser
 {
     private $raw_chars;
     private $chars;
@@ -25,6 +26,18 @@ class CharParser implements Parser
      */
     public function __construct($chars, $min = 0, $max = null, $capture = true)
     {
+        if (!is_numeric($min) && !is_null($min)) {
+            throw new GrammarException('Min must be numeric');
+        }
+
+        if (!is_numeric($max) && !is_null($max)) {
+            throw new GrammarException('Max must be numeric');
+        }
+
+        if (!is_bool($capture)) {
+            throw new GrammarException('Capture must be a boolean');
+        }
+
         $this->raw_chars = $chars;
         $this->chars = array_flip(str_split($chars));
         $this->min = $min;
