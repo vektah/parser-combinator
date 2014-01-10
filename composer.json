@@ -15,8 +15,7 @@
     "autoload": {
         "psr-0": {
             "vektah\\parser_combinator": "src/main/"
-        },
-        "files": ["src/main/vektah/parser_combinator/functions.php"]
+        }
     },
 
     "require" : {
