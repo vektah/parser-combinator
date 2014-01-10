@@ -17,9 +17,13 @@ class CssSelectorTest extends TestCase
 
     public function testSimple()
     {
-        // From https://metacpan.org/module/Google::ProtocolBuffers
-        $input = '.class #foo asd .foo #hash ag';
+        $input = '.class #foo asd bob.foo #hash ag, .foo, .class #foo asd bob.foo #hash ag, .foo, .class #foo asd bob.foo #hash ag, .foo, .class #foo asd bob.foo #hash ag, .foo, .class #foo asd bob.foo #hash ag, .foo, .class #foo asd bob.foo #hash ag, .foo';
 
-        print_r($this->parser->parse($input));
+        $ast = $this->parser->parse($input);
+        print_r($ast);
+
+        echo $ast ."\n";
+
+        echo $ast->toCss() ."\n";
     }
 }

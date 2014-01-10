@@ -4,6 +4,7 @@ namespace vektah\parser_combinator\formatter;
 
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\parser\Parser;
+use vektah\parser_combinator\parser\StringParser;
 
 class Closure extends Parser
 {
@@ -13,8 +14,11 @@ class Closure extends Parser
     /** @var  callable */
     private $function;
 
-    public function __construct(Parser $parser, callable $function)
+    public function __construct($parser, callable $function)
     {
+        if (is_string($parser)) {
+            $parser = new StringParser($parser);
+        }
         $this->function = $function;
         $this->parser = $parser;
     }

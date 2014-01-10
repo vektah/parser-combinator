@@ -10,12 +10,19 @@ use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
 use vektah\parser_combinator\formatter\Flatten;
+use vektah\parser_combinator\language\css\selectors\AdjacentSelector;
+use vektah\parser_combinator\language\css\selectors\AllSelector;
+use vektah\parser_combinator\language\css\selectors\AnySelector;
+use vektah\parser_combinator\language\css\selectors\ChildSelector;
+use vektah\parser_combinator\language\css\selectors\ClassSelector;
+use vektah\parser_combinator\language\css\selectors\DescendantSelector;
+use vektah\parser_combinator\language\css\selectors\HashSelector;
 use vektah\parser_combinator\language\Grammar;
+use vektah\parser_combinator\language\css\selectors\ElementSelector;
 use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\EofParser;
 use vektah\parser_combinator\parser\PositiveMatch;
-use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
 
 /**
@@ -55,14 +62,16 @@ class CssSelectorParser extends Grammar
             new Sequence("'", new Many(new Not(new CharParser("\n\r\f'")), '\n', '\r', '\f', '\''), "'")
         );
 
-        $this->namespace_prefix = new Sequence(new OptionalChoice($this->ident, '*'), '|');
+        $this->namespace_prefix = new Closure(new Sequence(new OptionalChoice($this->ident, '*'), '|'), function($data) {
+            return $data[0];
+        });
 
         $this->class = new Closure(new Sequence('.', $this->ident), function($data) {
             return new ClassSelector($data[1]);
         });
 
         $this->type_selector = new Closure(new Sequence(new OptionalChoice($this->namespace_prefix), $this->ident), function($data) {
-            return new TypeSelector($data[1], $data[0]);
+            return new ElementSelector($data[1], $data[0]);
         });
         $this->universal = new Sequence(new OptionalChoice($this->namespace_prefix), '*');
 
@@ -94,50 +103,64 @@ class CssSelectorParser extends Grammar
         $this->negation_arg = new Choice($this->type_selector, $this->universal, $this->hash, $this->class, $this->attrib, $this->pseudo);
         $this->negation = new Sequence('NOT', $this->ws, $this->negation_arg, $this->ws, ')');
 
-        $this->simple_selector_sequence = new Flatten(new Choice(
+        $this->simple_selector_sequence = new Closure(new Flatten(new Choice(
             new Sequence(
                 new Choice($this->type_selector, $this->universal),
                 new Many($this->hash, $this->class, $this->attrib, $this->pseudo, $this->negation)
             ),
             new Many([$this->hash, $this->class, $this->attrib, $this->pseudo, $this->negation], 1)
-        ));
-
-        $direct_descendant_combinator = new Closure(new StringParser('>'), function() {
-            return new DirectDescendantOf();
+        )), function($data) {
+            if (count($data) === 1) {
+                return $data[0];
+            } else {
+                return new AllSelector($data);
+            }
         });
 
-        $descendant_combinator = new Closure(new WhitespaceParser(1, true), function() {
-            return new DescendantOf();
-        });
-        $this->combinator = new Closure(new Sequence(new Choice('+', '~', $direct_descendant_combinator, $descendant_combinator), $this->ws), function($data) {
+        $this->combinator = new Closure(new Sequence(new Choice('+', '~', '>', new WhitespaceParser(1, true)), $this->ws), function($data) {
             return $data[0];
         });
 
         $this->selector = new Closure(new Sequence($this->simple_selector_sequence, new Many(new Sequence($this->combinator, $this->simple_selector_sequence))), function($data) {
-            $selectors = [];
+            $lhs = $data[0];
 
-            $selectors[] = $data[0];
+            foreach ($data[1] as $additional) {
+                $op = $additional[0];
+                $rhs = $additional[1];
 
-            foreach ($data[1] as $children) {
-                $selectors[] = $children[0];
-                $selectors[] = $children[1];
+                switch ($op) {
+                    case '+':
+                        $lhs = new AdjacentSelector($lhs, $rhs);
+                        break;
+                    case '>':
+                        $lhs = new ChildSelector($lhs, $rhs);
+                        break;
+                    default:
+                        $lhs = new DescendantSelector($lhs, $rhs);
+                        break;
+                }
             }
 
-            return new Selector($selectors);
+            return $lhs;
         });
 
         $this->selector_group = new Closure(new Sequence($this->selector, new Many(new Sequence(',', $this->ws, $this->selector))), function($data) {
-            $result = [];
+            if (count($data[1]) === 0) {
+                return $data[0];
+            } else {
+                $selectors = [];
 
-            $result[] = $data[0];
+                $selectors[] = $data[0];
+                foreach ($data[1] as $additional) {
+                    $selectors[] = $additional[1];
+                }
 
-            foreach ($data[1] as $additional) {
-                $result[] = $additional[2];
+                return new AnySelector($selectors);
             }
-
-            return $result;
         });
 
-        $this->root = new Sequence($this->selector_group, new EofParser());
+        $this->root = new Closure(new Sequence($this->selector_group, new EofParser()), function($data) {
+            return $data[0];
+        });
     }
 }

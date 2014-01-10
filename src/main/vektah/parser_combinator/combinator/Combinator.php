@@ -49,10 +49,6 @@ abstract class Combinator extends Parser
      */
     public function parse(Input $input)
     {
-        if (self::getParserStack()) {
-            file_put_contents('/tmp/log', self::getParserStack() . "\n", FILE_APPEND);
-        }
-
         $result = $this->combine($input);
         return $result;
     }

@@ -43,7 +43,7 @@ class JsonParser
         $int = new IntLiteral();
         $float = new FloatLiteral();
 
-        $value = new Choice([$bool, $null, $string, $float, $int]);
+        $value = new Choice($bool, $null, $string, $float, $int);
 
         $object = new Closure(new Sequence(
             [
@@ -98,7 +98,7 @@ class JsonParser
         });
 
         $value->append($object);
-        $array = new Closure(new Sequence([
+        $array = new Closure(new Sequence(
             $ws,
             $left_bracket,
             $ws,
@@ -108,7 +108,7 @@ class JsonParser
             $ws,
             $right_bracket,
             $ws
-        ]), function($data) {
+        ), function($data) {
             $result = [];
 
             if (is_array($data[0])) {
@@ -125,7 +125,7 @@ class JsonParser
         });
         $value->append($array);
 
-        $this->rootParser = new Closure(new Sequence([$value, new EofParser()]), function($data) {
+        $this->rootParser = new Closure(new Sequence($value, new EofParser()), function($data) {
             return $data[0];
         });
     }

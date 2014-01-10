@@ -40,24 +40,16 @@ class CharRangeParser extends Parser
                 if (!is_string($last[0])) {
                     throw new GrammarException('CharRangeParsers may contain array values containing only strings!');
                 }
-                $this->chars = array_flip(str_split($last[0]));
+                $chars = array_map(function($char) {
+                    return ord($char);
+                }, str_split($last[0]));
+
+                $this->chars = array_flip($chars);
                 $this->raw_chars = $last[0];
             } else {
                 $this->ranges[ord($first)] = ord($last);
             }
         }
-    }
-
-    private function inRanges($char) {
-        $ord = ord($char);
-
-        foreach ($this->ranges as $start => $end) {
-            if ($start <= $ord && $ord <= $end) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -72,14 +64,20 @@ class CharRangeParser extends Parser
         $offset = 0;
 
         while ($offset < $input->strlen()) {
-            file_put_contents('/tmp/log', $input->getOffset(), FILE_APPEND);
             if ($this->max !== null && $offset >= $this->max) {
                 break;
             }
 
-            $char = $input->peek($offset);
+            $char = ord($input->peek($offset));
 
-            if (!isset($this->chars[$char]) && !$this->inRanges($char)) {
+            if (!isset($this->chars[$char])) {
+                foreach ($this->ranges as $start => $end) {
+                    if ($start <= $char && $char <= $end) {
+                        $offset++;
+                        continue 2;
+                    }
+                }
+
                 break;
             }
 
