@@ -7,6 +7,7 @@ use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\exception\GrammarException;
+use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\StringParser;
@@ -33,6 +34,22 @@ class NotTest extends TestCase
 
         $this->assertEquals(['zzz'], $not->parse($input)->data);
         $this->assertEquals('abbb', $input->get());
+    }
+
+    public function testNotChar() {
+        $not = new Not(new CharParser('abcde', 1));
+        $input = new Input('zzzabbb');
+
+        $this->assertEquals(['zzz'], $not->parse($input)->data);
+        $this->assertEquals('abbb', $input->get());
+    }
+
+    public function testNotCharZeroWidth() {
+        $not = new Not(new CharParser('abcde'));
+        $input = new Input('zzzabbb');
+
+        $this->setExpectedException(GrammarException::_CLASS);
+        $not->parse($input)->data;
     }
 
     public function testEmpty() {

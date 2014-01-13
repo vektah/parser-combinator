@@ -20,6 +20,14 @@ abstract class Parser
     abstract public function parse(Input $input);
 
     public function getName() {
+        if (!$this->hasName()) {
+            return join('', array_slice(explode('\\', get_class($this)), -1));
+        }
+
+        return $this->name;
+    }
+
+    public function hasName() {
         return $this->name;
     }
 
@@ -30,13 +38,18 @@ abstract class Parser
     public static function getParserStack()
     {
         $message = '';
-        $trace = array_reverse(debug_backtrace());
+        $trace = debug_backtrace();
 
         $lastName = null;
         foreach ($trace as $frame) {
             if (isset($frame['object']) && $frame['object'] instanceof Parser && $name = $frame['object']->getName()) {
                 if ($name != $lastName) {
-                    $message .= $name . '.';
+                    if ($frame['object']->hasName()) {
+                        $message .= ' - #' . $name . "\n";
+                    } else {
+                        $message .= ' - ' . $name . "\n";
+                    }
+
                 }
 
                 $lastName = $name;

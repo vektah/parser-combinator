@@ -21,13 +21,13 @@ class OptionalChoice extends Combinator
 
             // Errors and positive results will stop us from searching.
             if (!$result->errorMessage || $result->positiveMatch) {
-                return $result;
+                return $result->addParser($this);
             }
 
             // To be safe we rewind the input after each attempt.
             $input->setOffset($initialOffset);
         }
 
-        return Result::match(null);
+        return Result::match(null)->addParser($this);
     }
 }

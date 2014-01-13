@@ -19,7 +19,7 @@ class Grammar
             $parser = new StringParser($parser);
         }
         $this->parsers[$name] = $parser;
-        if (!$parser->getName()) {
+        if (!$parser->hasName()) {
             $parser->setName($name);
         }
 
@@ -44,9 +44,9 @@ class Grammar
         $result = $this->root->parse(new Input($input));
 
         if ($result->errorMessage) {
-            throw new ParseException($result->errorMessage);
-        } else {
-            return $result->data;
+            throw new ParseException($result->errorMessage . "\nParser Stack:\n - " . implode("\n - ", $result->getParsers()) . "\n");
         }
+
+        return $result->data;
     }
 }

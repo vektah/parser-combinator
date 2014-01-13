@@ -30,23 +30,23 @@ class StringParser extends Parser
     {
         if ($this->needle == '') {
             if ($this->capture) {
-                return Result::match('');
+                return Result::match('')->addParser($this);
             }
-            return Result::nonCapturingMatch();
+            return Result::nonCapturingMatch()->addParser($this);
         }
 
         if (!$input->startsWith($this->needle, $this->case_sensitive)) {
-            return Result::error("At {$input->getPositionDescription()}: Expected '{$this->needle}' but found '{$input->get()}'");
+            return Result::error("At {$input->getPositionDescription()}: Expected '{$this->needle}' but found '{$input->get()}'")->addParser($this);
         }
 
         if (!$this->capture) {
             $input->consume(strlen($this->needle));
-            return Result::nonCapturingMatch();
+            return Result::nonCapturingMatch()->addParser($this);
         }
 
         $output = $input->get(strlen($this->needle));
         $input->consume(strlen($this->needle));
 
-        return Result::match($output);
+        return Result::match($output)->addParser($this);
     }
 }

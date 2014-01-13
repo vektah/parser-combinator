@@ -16,7 +16,7 @@ class Flatten extends Parser
 
     public function parse(Input $input)
     {
-        $original_result = $this->parser->parse($input);
+        $original_result = $this->parser->parse($input)->addParser($this);
 
         if (is_array($original_result->data)) {
             $result = array();

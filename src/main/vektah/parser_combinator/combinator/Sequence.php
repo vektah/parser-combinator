@@ -13,7 +13,7 @@ class Sequence extends Combinator
         $isPositive = false;
 
         foreach ($this->getParsers() as $parser) {
-            $result = $parser->parse($input);
+            $result = $parser->parse($input)->addParser($this);
 
             if ($result->hasData) {
                 $aggregatedData[] = $result->data;
@@ -26,14 +26,15 @@ class Sequence extends Combinator
 
             // Any single error causes the whole sequence to error
             if ($result->errorMessage) {
-                return Result::error($result->errorMessage, $isPositive);
+                $result->positiveMatch = $isPositive;
+                return $result;
             }
         }
 
-        if ($aggregatedData == []) {
-            return Result::nonCapturingMatch($isPositive);
+        if ($aggregatedData === []) {
+            return Result::nonCapturingMatch($isPositive)->addParser($this);
         } else {
-            return Result::match($aggregatedData, $isPositive);
+            return Result::match($aggregatedData, $isPositive)->addParser($this);
         }
     }
 }

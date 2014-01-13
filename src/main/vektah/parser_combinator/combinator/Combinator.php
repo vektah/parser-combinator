@@ -45,13 +45,18 @@ abstract class Combinator extends Parser
     }
 
     /**
+     * @param \vektah\parser_combinator\Input $input
      * @return Result
      */
     public function parse(Input $input)
     {
-        $result = $this->combine($input);
+        $result = $this->combine($input)->addParser($this);
         return $result;
     }
 
+    /**
+     * @param Input $input
+     * @return Result
+     */
     abstract public function combine(Input $input);
 }

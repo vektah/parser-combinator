@@ -4,9 +4,13 @@
 namespace vektah\parser_combinator\language\css\selectors;
 
 use vektah\parser_combinator\exception\GrammarException;
+use vektah\parser_combinator\language\css\CssObject;
 
 class AllSelector extends Selector
 {
+    /** @var Selector[] */
+    private $children;
+
     public function __construct($children) {
         if (!is_array($children)) {
             $children = func_get_args();
@@ -41,5 +45,35 @@ class AllSelector extends Selector
     public function __toString()
     {
         return 'All(' .  implode(', ', $this->children) . ')';
+    }
+
+    public function define() {
+        $object = new CssObject();
+
+        foreach ($this->children as $child) {
+            $child_object = $child->define();
+            foreach ($child_object as $key => $value) {
+                if ($value) {
+                    if (is_array($object->$key)) {
+                        $object->$key = array_merge($object->$key, $child_object->$key);
+                    } else {
+                        $object->$key = $child_object->$key;
+                    }
+                }
+            }
+        }
+
+        return $object;
+    }
+
+    public function matchesObject(CssObject $object)
+    {
+        foreach ($this->children as $child) {
+            if (!$child->matchesObject($object)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

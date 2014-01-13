@@ -13,9 +13,9 @@ class EofParser extends Parser
     public function parse(Input $input)
     {
         if (!$input->complete()) {
-            return Result::error("At {$input->getPositionDescription()}: Unable to process {$input->get()}");
+            return Result::error("At {$input->getPositionDescription()}: Unable to process {$input->get()}")->addParser($this);
         }
 
-        return Result::nonCapturingMatch();
+        return Result::nonCapturingMatch()->addParser($this);
     }
 }

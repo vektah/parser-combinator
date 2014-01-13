@@ -39,4 +39,15 @@ class CharRangeParserTest extends TestCase
         $this->assertEquals('asdf0123ee', $parser->parse(new Input('asdf0123ee'))->data);
         $this->assertEquals('asdf-1234-', $parser->parse(new Input('asdf-1234-'))->data);
     }
+
+    public function testMinError()
+    {
+        $parser = new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9'], 1);
+        $result = $parser->parse(new Input('-----'));
+
+        $this->assertNull($result->data);
+        $this->assertNotNull($result->errorMessage);
+
+    }
+
 }

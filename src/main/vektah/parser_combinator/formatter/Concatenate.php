@@ -29,7 +29,7 @@ class Concatenate extends Parser
 
     public function parse(Input $input)
     {
-        $result = $this->parser->parse($input);
+        $result = $this->parser->parse($input)->addParser($this);
 
         if (is_array($result->data)) {
             $result->data = $this->implode($this->glue, $result->data);

@@ -16,6 +16,6 @@ class GrammarException extends Exception
     const _CLASS = __CLASS__;
 
     public function __construct($message) {
-        parent::__construct(Parser::getParserStack() . ': ' . $message);
+        parent::__construct($message . "\nParser Stack:\n" . Parser::getParserStack());
     }
 }

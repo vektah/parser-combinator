@@ -11,9 +11,13 @@ class Not extends Combinator
 {
     public function combine(Input $input)
     {
+        if ($input->complete()) {
+            return Result::error('Not cannot be matched at end of stream.')->addParser($this);
+        }
+
         // Initially no parser should match, this would be a zero width result
         if ($this->matches($input)) {
-            return Result::error('At ' . $input->getPositionDescription() . ": Found a match at the start of the source {$input->get()}");
+            return Result::error('At ' . $input->getPositionDescription() . ": Found a match at the start of the source {$input->get()}")->addParser($this);
         }
 
         $consumed = '';
@@ -22,7 +26,7 @@ class Not extends Combinator
             $input->consume(1);
         }
 
-        return Result::match([$consumed]);
+        return Result::match([$consumed])->addParser($this);
     }
 
     private function matches(Input $input) {
@@ -35,6 +39,10 @@ class Not extends Combinator
 
             // Errors and positive results will stop us from searching.
             if ($result->match) {
+                if ($initialOffset === $input->getOffset()) {
+                    throw new GrammarException('There was a zero width match inside a Not parser.');
+                }
+
                 $input->setOffset($initialOffset);
                 return true;
             }

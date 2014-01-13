@@ -17,7 +17,7 @@ class Choice extends Combinator
         foreach ($this->getParsers() as $parser) {
             // Keep trying each of the parsers until one matches.
 
-            $result = $parser->parse($input);
+            $result = $parser->parse($input)->addParser($this);
 
             // Errors and positive results will stop us from searching.
             if (!$result->errorMessage || $result->positiveMatch) {

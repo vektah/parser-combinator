@@ -23,7 +23,7 @@ class Ignore extends Parser
      */
     public function parse(Input $input)
     {
-        $result = $this->parser->parse($input);
+        $result = $this->parser->parse($input)->addParser($this);
 
         $result->hasData = false;
         $result->data = null;

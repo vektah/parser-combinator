@@ -3,6 +3,8 @@
 
 namespace vektah\parser_combinator\language\css\selectors;
 
+use vektah\parser_combinator\language\css\CssObject;
+
 class ClassSelector extends Selector
 {
     /** @var string */
@@ -27,5 +29,20 @@ class ClassSelector extends Selector
 
     public function __toString() {
         return "Class($this->class)";
+    }
+
+    /**
+     * @return CssObject
+     */
+    public function define()
+    {
+        $object = new CssObject();
+
+        $object->classes[] = $this->class;
+    }
+
+    public function matchesObject(CssObject $object)
+    {
+        return in_array($this->class, $object->classes);
     }
 }

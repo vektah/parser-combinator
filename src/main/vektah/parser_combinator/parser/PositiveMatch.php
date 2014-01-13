@@ -22,6 +22,6 @@ class PositiveMatch extends Parser
      */
     public function parse(Input $input)
     {
-        return Result::nonCapturingMatch(true);
+        return Result::nonCapturingMatch(true)->addParser($this);
     }
 }

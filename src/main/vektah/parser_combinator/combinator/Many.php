@@ -40,7 +40,7 @@ class Many extends Choice
 
         $lastOffset = $input->getOffset();
         while ($this->max === null || $count < $this->max) {
-            $result = parent::combine($input);
+            $result = parent::combine($input)->addParser($this);
 
             if ($result->positiveMatch) {
                 $isPositive = true;
@@ -59,7 +59,7 @@ class Many extends Choice
             }
 
             if ($input->getOffset() == $lastOffset) {
-                throw new GrammarException('At ' . $input->getPositionDescription() . ": parser did not consume any input, this is a bug with the grammar. Make sure there are no zero width matches in a Many.");
+                throw new GrammarException('At ' . $input->getPositionDescription() . ": parser {$result->getParserStack()} did not consume any input, this is a bug with the grammar. Make sure there are no zero width matches in a Many. The result in  was {$result}");
             }
 
             if ($result->hasData) {
@@ -71,7 +71,7 @@ class Many extends Choice
         }
 
         if ($count < $this->min) {
-            return Result::error('At ' . $input->getPositionDescription() . ": Expected {$this->min} elements, but found $count", $isPositive);
+            return Result::error('At ' . $input->getPositionDescription() . ": Expected {$this->min} elements, but found $count", $isPositive)->addParser($this);
         }
 
         return Result::match($aggregatedResult, $isPositive);

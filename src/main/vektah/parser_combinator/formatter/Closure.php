@@ -26,7 +26,7 @@ class Closure extends Parser
 
     public function parse(Input $input)
     {
-        $result = $this->parser->parse($input);
+        $result = $this->parser->parse($input)->addParser($this);
         // Don't call the callback if there was an error.
         if ($result->errorMessage) {
             return $result;
