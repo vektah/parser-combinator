@@ -4,6 +4,7 @@
 namespace vektah\parser_combinator\test\language\css;
 
 use PHPUnit_Framework_TestCase as TestCase;
+use vektah\parser_combinator\Input;
 use vektah\parser_combinator\language\css\CssObject;
 use vektah\parser_combinator\language\css\CssSelectorParser;
 
@@ -20,7 +21,7 @@ class CssSelectorTest extends TestCase
     }
 
     private function assertMatch($selector, $object_definition) {
-        $ast = $this->parser->parse($selector);
+        $ast = $this->parser->parseString($selector);
 
         $this->assertEquals($selector, $ast->toCss());
 
@@ -28,7 +29,7 @@ class CssSelectorTest extends TestCase
     }
 
     private function assertNotMatch($selector, $object_definition) {
-        $ast = $this->parser->parse($selector);
+        $ast = $this->parser->parseString($selector);
 
         $this->assertEquals($selector, $ast->toCss());
 
@@ -39,7 +40,7 @@ class CssSelectorTest extends TestCase
     {
         $input = 'p';
 
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals($input, $ast->toCss());
         $this->assertEquals('Element(p)', $ast->__toString());
@@ -54,7 +55,7 @@ class CssSelectorTest extends TestCase
     {
         $input = 'li, p';
 
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals($input, $ast->toCss());
         $this->assertEquals('Any(Element(li), Element(p))', $ast->__toString());
@@ -69,7 +70,7 @@ class CssSelectorTest extends TestCase
     {
         $input = '*';
 
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals($input, $ast->toCss());
         $this->assertEquals('Universal()', $ast->__toString());
@@ -84,7 +85,7 @@ class CssSelectorTest extends TestCase
     {
         $input = '#foo';
 
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
         $this->assertEquals(new CssObject(['id' => 'foo']), $ast->define());
 
         $this->assertEquals($input, $ast->toCss());
@@ -99,7 +100,7 @@ class CssSelectorTest extends TestCase
         $input = 'p[title]';
 
 
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => true]]), $ast->define());
 
@@ -115,7 +116,7 @@ class CssSelectorTest extends TestCase
         $input = "address[title='foo']";
 
 
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'address', 'attributes' => ['title' => 'foo']]), $ast->define());
 
@@ -128,7 +129,7 @@ class CssSelectorTest extends TestCase
     public function testMultipleAttributeEquals()
     {
         $input = "p[class~='foo']";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['class' => 'foo']]), $ast->define());
 
@@ -149,7 +150,7 @@ class CssSelectorTest extends TestCase
     {
 
         $input = "p[title~='hello world']";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'hello world']]), $ast->define());
 
@@ -162,7 +163,7 @@ class CssSelectorTest extends TestCase
     public function testAttributeValueSelectorsWithHyphens()
     {
         $input = "p[lang|='en']";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['lang' => 'en']]), $ast->define());
 
@@ -176,7 +177,7 @@ class CssSelectorTest extends TestCase
     public function testSubstringMatchingAtBeginning()
     {
         $input = "p[title^='foo']";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'foo']]), $ast->define());
 
@@ -190,7 +191,7 @@ class CssSelectorTest extends TestCase
     public function testSubstringMatchingAtEnd()
     {
         $input = "p[title$='bar']";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'bar']]), $ast->define());
 
@@ -204,7 +205,7 @@ class CssSelectorTest extends TestCase
     public function testSubstringContains()
     {
         $input = "p[title*='bar']";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'bar']]), $ast->define());
 
@@ -247,7 +248,7 @@ class CssSelectorTest extends TestCase
     public function testID()
     {
         $input = "#t1";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['id' => 't1']), $ast->define());
 
@@ -314,7 +315,7 @@ class CssSelectorTest extends TestCase
     public function testDescendantCombinator()
     {
         $input = "div.t1 p";
-        $ast = $this->parser->parse($input);
+        $ast = $this->parser->parseString($input);
 
         $this->assertEquals(new CssObject(['element' => 'div', 'classes' => ['t1'], 'children' => [new CssObject(['element' => 'p'])]]), $ast->define());
 
@@ -328,5 +329,14 @@ class CssSelectorTest extends TestCase
     public function testDoubleNot()
     {
         $this->assertNotMatch('p:not(:not(p))', 'p');
+    }
+
+    public function testDoesNotConsumeBlocks()
+    {
+        $input = new Input('h1 {}');
+        $result = $this->parser->parse($input)->data;
+
+        $this->assertEquals('Element(h1)', $result->__toString());
+        $this->assertEquals(' {}', $input->get());
     }
 }

@@ -3,12 +3,12 @@
 namespace vektah\parser_combinator\language;
 
 use vektah\parser_combinator\Input;
+use vektah\parser_combinator\Result;
 use vektah\parser_combinator\exception\GrammarException;
-use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\StringParser;
 
-class Grammar
+class Grammar extends Parser
 {
     /** @var Parser[] */
     private $parsers;
@@ -34,18 +34,11 @@ class Grammar
     }
 
     /**
-     * @param string $input
-     * @throws ParseException
-     * @return mixed
+     * @param Input $input
+     * @return Result
      */
-    public function parse($input)
+    public function parse(Input $input)
     {
-        $result = $this->root->parse(new Input($input));
-
-        if ($result->errorMessage) {
-            throw new ParseException($result->errorMessage . "\nParser Stack:\n - " . implode("\n - ", $result->getParsers()) . "\n");
-        }
-
-        return $result->data;
+        return $this->root->parse($input);
     }
 }

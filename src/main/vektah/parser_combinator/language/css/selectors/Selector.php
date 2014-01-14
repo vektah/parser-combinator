@@ -12,7 +12,7 @@ abstract class Selector
         if (!is_string($selector)) {
             throw new \InvalidArgumentException("$selector must be a string");
         }
-        $selector = CssSelectorParser::instance()->parse($selector);
+        $selector = CssSelectorParser::instance()->parseString($selector);
         $object = $selector->define();
         $object->isRoot = true;
         return $this->matchesObject($object);

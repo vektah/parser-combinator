@@ -22,10 +22,8 @@ use vektah\parser_combinator\language\css\selectors\ElementSelector;
 use vektah\parser_combinator\language\css\selectors\HashSelector;
 use vektah\parser_combinator\language\css\selectors\NotSelector;
 use vektah\parser_combinator\language\css\selectors\PseudoSelector;
-use vektah\parser_combinator\language\css\selectors\Selector;
 use vektah\parser_combinator\language\css\selectors\UniversalSelector;
 use vektah\parser_combinator\parser\CharRangeParser;
-use vektah\parser_combinator\parser\EofParser;
 use vektah\parser_combinator\parser\PositiveMatch;
 use vektah\parser_combinator\parser\SingletonTrait;
 use vektah\parser_combinator\parser\StringParser;
@@ -53,14 +51,15 @@ class CssSelectorParser extends Grammar
         $this->dash_match = '|=';
         $this->substring_match = '*=';
         $this->includes = '~=';
-        $this->name = new Concatenate(new Many([$this->nmchar], 1));
         $this->num = new Choice(
             new CharRangeParser(['0' => '9'], 1),
-            new Sequence(
-                new CharRangeParser(['0' => '9']),
-                '.',
-                $this->positive,
-                new CharRangeParser(['0' => '9', 1])
+            new Concatenate(
+                new Sequence(
+                    new CharRangeParser(['0' => '9']),
+                    '.',
+                    $this->positive,
+                    new CharRangeParser(['0' => '9', 1])
+                )
             )
         );
         $this->dimension = new Sequence($this->num, $this->ident);
@@ -83,7 +82,7 @@ class CssSelectorParser extends Grammar
             return new UniversalSelector($data[0]);
         });
 
-        $this->hash = new Closure(new Sequence('#', $this->name), function($data) {
+        $this->hash = new Closure(new Sequence('#', new Concatenate(new Many([$this->nmchar], 1))), function($data) {
             return new HashSelector($data[1]);
         });
 
@@ -190,7 +189,7 @@ class CssSelectorParser extends Grammar
             return $lhs;
         });
 
-        $this->selector_group = new Closure(new Sequence($this->selector, new Many(new Sequence(',', $this->ws, $this->selector))), function($data) {
+        $this->root = new Closure(new Sequence($this->selector, new Many(new Sequence(',', $this->ws, $this->selector))), function($data) {
             if (count($data[1]) === 0) {
                 return $data[0];
             } else {
@@ -204,17 +203,5 @@ class CssSelectorParser extends Grammar
                 return new AnySelector($selectors);
             }
         });
-
-        $this->root = new Closure(new Sequence($this->selector_group, new EofParser()), function($data) {
-            return $data[0];
-        });
-    }
-
-    /**
-     * @param string $input
-     * @return Selector
-     */
-    public function parse($input) {
-        return parent::parse($input);
     }
 }
