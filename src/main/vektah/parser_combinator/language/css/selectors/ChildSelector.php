@@ -50,6 +50,4 @@ class ChildSelector extends Selector
 
         return false;
     }
-
-
 }

@@ -7,10 +7,10 @@ use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\combinator\OptionalChoice;
 use vektah\parser_combinator\combinator\Sequence;
-use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
 use vektah\parser_combinator\formatter\Flatten;
+use vektah\parser_combinator\language\Grammar;
 use vektah\parser_combinator\language\css\selectors\AdjacentSelector;
 use vektah\parser_combinator\language\css\selectors\AllSelector;
 use vektah\parser_combinator\language\css\selectors\AnySelector;
@@ -18,16 +18,17 @@ use vektah\parser_combinator\language\css\selectors\AttributeSelector;
 use vektah\parser_combinator\language\css\selectors\ChildSelector;
 use vektah\parser_combinator\language\css\selectors\ClassSelector;
 use vektah\parser_combinator\language\css\selectors\DescendantSelector;
+use vektah\parser_combinator\language\css\selectors\ElementSelector;
 use vektah\parser_combinator\language\css\selectors\HashSelector;
+use vektah\parser_combinator\language\css\selectors\NotSelector;
+use vektah\parser_combinator\language\css\selectors\PseudoSelector;
 use vektah\parser_combinator\language\css\selectors\Selector;
 use vektah\parser_combinator\language\css\selectors\UniversalSelector;
-use vektah\parser_combinator\language\Grammar;
-use vektah\parser_combinator\language\css\selectors\ElementSelector;
-use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\EofParser;
 use vektah\parser_combinator\parser\PositiveMatch;
 use vektah\parser_combinator\parser\SingletonTrait;
+use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
 
 /**
@@ -45,7 +46,7 @@ class CssSelectorParser extends Grammar
         $this->unicode = new Sequence('\\', new CharRangeParser(['0' => '9', 'a' => 'f', 'A' => 'F'], 1, 6), $this->ws);
         $this->escape = new Choice($this->unicode, new Sequence('\\', new Not(new CharRangeParser(['0' => '9', 'a' => 'f', 'A' => 'F', ["\r\n"]], 1))));
         $this->nmstart = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', ['_']], 1, 1), $this->nonascii, $this->escape);
-        $this->nmchar = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9', ['_']], 1), $this->nonascii, $this->escape);
+        $this->nmchar = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9', ['_-']], 1), $this->nonascii, $this->escape);
         $this->ident = new Concatenate(new Sequence(new OptionalChoice('-'), $this->nmstart, new Many($this->nmchar)));
         $this->prefix_match = '^=';
         $this->suffix_match = '$=';
@@ -98,7 +99,12 @@ class CssSelectorParser extends Grammar
             new OptionalChoice(
                 new Sequence(
                     new Choice(
-                        $this->prefix_match, $this->suffix_match, $this->substring_match, $this->dash_match, '=', $this->includes
+                        $this->prefix_match,
+                        $this->suffix_match,
+                        $this->substring_match,
+                        $this->dash_match,
+                        '=',
+                        $this->includes
                     ),
                     $this->positive,
                     $this->ws,
@@ -114,18 +120,41 @@ class CssSelectorParser extends Grammar
                 return new AttributeSelector($data[1], $data[2][0], $data[2][1]);
             }
         });
-        $this->expression = new Sequence(new Choice('+', '-', $this->dimension, $this->num, $this->string, $this->ident), $this->ws);
-        $this->functional_pseudo = new Sequence($this->ident, $this->ws, '(', $this->ws, new Many($this->expression), $this->ws, ')');
-        $this->pseudo = new Sequence(':', new OptionalChoice(':'), new Choice($this->ident, $this->functional_pseudo));
-        $this->negation_arg = new Choice($this->type_selector, $this->universal, $this->hash, $this->class, $this->attrib, $this->pseudo);
-        $this->negation = new Sequence('NOT', $this->ws, $this->negation_arg, $this->ws, ')');
+        $this->expression = new Concatenate(new Sequence(new Choice('+', '-', $this->dimension, $this->num, $this->string, $this->ident), $this->ws));
+        $this->pseudo = new Closure(
+            new Sequence(':', new OptionalChoice(':'), $this->ident, $this->ws, new OptionalChoice(new Sequence(
+                '(',
+                $this->positive,
+                $this->ws,
+                $this->expression,
+                $this->ws,
+                ')'
+            ))),
+            function($data) {
+                return new PseudoSelector($data[2], is_array($data[3]) ? $data[3][1] : null);
+            }
+        );
+
+        $this->negation = new Closure(
+            new Sequence(
+                new StringParser(':not(', false, false),
+                $this->positive,
+                $this->ws,
+                new Choice($this->type_selector, $this->universal, $this->hash, $this->class, $this->attrib, $this->pseudo),
+                $this->ws,
+                ')'
+            ),
+            function($data) {
+                return new NotSelector($data[0]);
+            }
+        );
 
         $this->simple_selector_sequence = new Closure(new Flatten(new Choice(
             new Sequence(
                 new Choice($this->type_selector, $this->universal),
-                new Many($this->hash, $this->class, $this->attrib, $this->pseudo, $this->negation)
+                new Many($this->hash, $this->class, $this->attrib, $this->negation, $this->pseudo)
             ),
-            new Many([$this->hash, $this->class, $this->attrib, $this->pseudo, $this->negation], 1)
+            new Many([$this->hash, $this->class, $this->attrib, $this->negation, $this->pseudo], 1)
         )), function($data) {
             if (count($data) === 1) {
                 return $data[0];

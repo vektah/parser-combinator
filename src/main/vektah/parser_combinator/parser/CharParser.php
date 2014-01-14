@@ -2,9 +2,9 @@
 
 namespace vektah\parser_combinator\parser;
 
-use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
+use vektah\parser_combinator\exception\GrammarException;
 
 /**
  * Matches any sequence of chars, generally preferred over regex for performance reasons (regex requires a copy

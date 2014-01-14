@@ -38,7 +38,7 @@ class DescendantSelector extends Selector
 
     public function matchesObject(CssObject $object)
     {
-        if (!$this->parent->matches($object)) {
+        if (!$this->parent->matchesObject($object)) {
             return false;
         }
 

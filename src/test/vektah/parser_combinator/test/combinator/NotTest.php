@@ -3,14 +3,10 @@
 namespace vektah\parser_combinator\test\combinator;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\combinator\Many;
+use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\parser\CharParser;
-use vektah\parser_combinator\parser\CharRangeParser;
-use vektah\parser_combinator\parser\RegexParser;
-use vektah\parser_combinator\parser\StringParser;
 
 class NotTest extends TestCase
 {

@@ -47,7 +47,5 @@ class CharRangeParserTest extends TestCase
 
         $this->assertNull($result->data);
         $this->assertNotNull($result->errorMessage);
-
     }
-
 }

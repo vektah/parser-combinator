@@ -133,23 +133,31 @@ class AttributeSelector extends Selector
             return false;
         }
         if ($this->comparator && $this->value) {
+            $haystack = $object->attributes[$this->name];
+            $needle = $this->value;
 
             switch ($this->comparator) {
                 case '=':
-                    return $object->attributes[$this->name] === $this->value;
+                    return $haystack === $needle;
                 case '~=':
-                    foreach (preg_split('/\s+/', $object->attributes[$this->name]) as $value) {
-                        if ($value === $this->value) {
+                    foreach (preg_split('/\s+/', $haystack) as $value) {
+                        if ($value === $needle) {
                             return true;
                         }
                     }
                     return false;
+                case '^=':
+                    return strpos($haystack, $needle) === 0;
+                case '$=':
+                    return substr($haystack, -strlen($needle)) === $needle;
+                case '*=':
+                    return strpos($haystack, $needle) !== false;
                 case '|=':
-                    if ($object->attributes[$this->name] === $this->value) {
+                    if ($haystack === $this->value) {
                         return true;
                     }
 
-                    return substr($object->attributes[$this->name], 0, strlen($this->value) + 1) === "$this->value-";
+                    return substr($haystack, 0, strlen($needle) + 1) === "$needle-";
             }
         }
 

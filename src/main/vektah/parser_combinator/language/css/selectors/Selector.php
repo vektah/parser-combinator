@@ -9,10 +9,13 @@ use vektah\parser_combinator\language\css\CssSelectorParser;
 abstract class Selector
 {
     public function matches($selector) {
-        if (is_string($selector)) {
-            $selector = CssSelectorParser::instance()->parse($selector);
+        if (!is_string($selector)) {
+            throw new \InvalidArgumentException("$selector must be a string");
         }
-        return $this->matchesObject($selector->define());
+        $selector = CssSelectorParser::instance()->parse($selector);
+        $object = $selector->define();
+        $object->isRoot = true;
+        return $this->matchesObject($object);
 
     }
 

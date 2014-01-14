@@ -39,6 +39,8 @@ class ClassSelector extends Selector
         $object = new CssObject();
 
         $object->classes[] = $this->class;
+
+        return $object;
     }
 
     public function matchesObject(CssObject $object)

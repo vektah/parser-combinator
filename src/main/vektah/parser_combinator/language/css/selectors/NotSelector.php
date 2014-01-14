@@ -6,7 +6,7 @@ namespace vektah\parser_combinator\language\css\selectors;
 use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\language\css\CssObject;
 
-class AllSelector extends Selector
+class NotSelector extends Selector
 {
     /** @var Selector[] */
     private $children;
@@ -18,7 +18,7 @@ class AllSelector extends Selector
 
         foreach ($children as $child) {
             if (!($child instanceof Selector)) {
-                throw new GrammarException('Children of All must be selectors. Got: ' . print_r($child, true));
+                throw new GrammarException('Children must be selectors');
             }
         }
 
@@ -35,41 +35,27 @@ class AllSelector extends Selector
 
     public function toCss()
     {
-        $child_css = array_map(function($child) {
+        $child_css = array_map(function(Selector $child) {
             return $child->toCss();
         }, $this->children);
 
-        return implode('', $child_css);
+        return ':not(' . implode('', $child_css) . ')';
     }
 
     public function __toString()
     {
-        return 'All(' .  implode(', ', $this->children) . ')';
+        return 'Not(' .  implode(', ', $this->children) . ')';
     }
 
     public function define() {
-        $object = new CssObject();
-
-        foreach ($this->children as $child) {
-            $child_object = $child->define();
-            foreach ($child_object as $key => $value) {
-                if ($value) {
-                    if (is_array($object->$key)) {
-                        $object->$key = array_merge($object->$key, $child_object->$key);
-                    } else {
-                        $object->$key = $child_object->$key;
-                    }
-                }
-            }
-        }
-
-        return $object;
+        // Cant really define an object like this...
+        return new CssObject();
     }
 
     public function matchesObject(CssObject $object)
     {
         foreach ($this->children as $child) {
-            if (!$child->matchesObject($object)) {
+            if ($child->matchesObject($object)) {
                 return false;
             }
         }

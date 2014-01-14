@@ -3,9 +3,9 @@
 
 namespace vektah\parser_combinator\test\language\css;
 
+use PHPUnit_Framework_TestCase as TestCase;
 use vektah\parser_combinator\language\css\CssObject;
 use vektah\parser_combinator\language\css\CssSelectorParser;
-use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  * These tests are taken from http://www.w3.org/Style/CSS/Test/CSS3/Selectors/current/html/index.html
@@ -17,6 +17,22 @@ class CssSelectorTest extends TestCase
 
     public function setUp() {
         $this->parser = new CssSelectorParser();
+    }
+
+    private function assertMatch($selector, $object_definition) {
+        $ast = $this->parser->parse($selector);
+
+        $this->assertEquals($selector, $ast->toCss());
+
+        $this->assertTrue($ast->matches($object_definition), "$ast does not match $object_definition");
+    }
+
+    private function assertNotMatch($selector, $object_definition) {
+        $ast = $this->parser->parse($selector);
+
+        $this->assertEquals($selector, $ast->toCss());
+
+        $this->assertFalse($ast->matches($object_definition), "$ast matches $object_definition");
     }
 
     public function testElement()
@@ -155,5 +171,162 @@ class CssSelectorTest extends TestCase
 
         $this->assertTrue($ast->matches("p[lang='en-gb']"));
         $this->assertFalse($ast->matches("p[lang='fr-en']"));
+    }
+
+    public function testSubstringMatchingAtBeginning()
+    {
+        $input = "p[title^='foo']";
+        $ast = $this->parser->parse($input);
+
+        $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'foo']]), $ast->define());
+
+        $this->assertEquals($input, $ast->toCss());
+        $this->assertEquals("All(Element(p), Attribute(title^='foo'))", $ast->__toString());
+
+        $this->assertTrue($ast->matches("p[title='foobar']"));
+        $this->assertFalse($ast->matches("p[title='barfoo']"));
+    }
+
+    public function testSubstringMatchingAtEnd()
+    {
+        $input = "p[title$='bar']";
+        $ast = $this->parser->parse($input);
+
+        $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'bar']]), $ast->define());
+
+        $this->assertEquals($input, $ast->toCss());
+        $this->assertEquals("All(Element(p), Attribute(title$='bar'))", $ast->__toString());
+
+        $this->assertTrue($ast->matches("p[title='foobar']"));
+        $this->assertFalse($ast->matches("p[title='barfoo']"));
+    }
+
+    public function testSubstringContains()
+    {
+        $input = "p[title*='bar']";
+        $ast = $this->parser->parse($input);
+
+        $this->assertEquals(new CssObject(['element' => 'p', 'attributes' => ['title' => 'bar']]), $ast->define());
+
+        $this->assertEquals($input, $ast->toCss());
+        $this->assertEquals("All(Element(p), Attribute(title*='bar'))", $ast->__toString());
+
+        $this->assertTrue($ast->matches("p[title='foobarbaz']"));
+        $this->assertFalse($ast->matches("p[title='foo']"));
+    }
+
+    public function testClassSelectors()
+    {
+        $this->assertMatch('.t1', '.t1');
+        $this->assertMatch('li.t1', 'li.t1');
+        $this->assertNotMatch('p.te', 'p.test');
+    }
+
+    public function testMultipleClassSelectors()
+    {
+        $this->assertMatch('p.t1', 'p.t1.t2');
+        $this->assertMatch('p.t2', 'p.t1.t2');
+        $this->assertMatch('p.te.st', 'p.te.st');
+        $this->assertMatch('p.t5.t5', 'p.t5');
+
+        $this->assertNotMatch('p.te.st', 'p.test');
+        $this->assertNotMatch('p.t1.fail', 'p.t1');
+        $this->assertNotMatch('p.fail.t1', 'p.t1');
+    }
+
+    public function testNegated()
+    {
+        $this->assertMatch('div:not(.t1)', 'div.t2');
+
+        $this->assertNotMatch('.t1:not(.t2)', 'p.t1.t2');
+        $this->assertNotMatch('.t2:not(.t1)', 'p.t1.t2');
+        $this->assertNotMatch(':not(.t1).t2', 'p.t1.t2');
+        $this->assertNotMatch(':not(.t2):not(.t2)', 'p.t1.t2');
+    }
+
+    public function testID()
+    {
+        $input = "#t1";
+        $ast = $this->parser->parse($input);
+
+        $this->assertEquals(new CssObject(['id' => 't1']), $ast->define());
+
+        $this->assertEquals($input, $ast->toCss());
+        $this->assertEquals("Hash(t1)", $ast->__toString());
+
+        $this->assertTrue($ast->matches("p#t1"));
+        $this->assertFalse($ast->matches("p#t2"));
+    }
+
+    public function testMultipleIDSelectors()
+    {
+        $this->assertMatch('p', 'p#test');
+        $this->assertMatch('#pass#pass', '#pass');
+
+        $this->assertNotMatch('#test#fail', '#test');
+        $this->assertNotMatch('#test#fail', '#fail');
+    }
+
+    public function testPseudoClass()
+    {
+        $this->assertMatch('*:link', 'a');
+
+        $this->assertNotMatch('*:hover', 'a');
+        $this->assertNotMatch('*:visited', 'a');
+        $this->assertNotMatch('*:active', 'a');
+    }
+
+    public function testLangPseudoClass()
+    {
+        $this->assertMatch('li:lang(en-GB)', 'li[lang="en-GB"]');
+        $this->assertMatch('li:lang(en-GB)', 'li[lang="en-GB-wa"]');
+
+        $this->assertNotMatch('li:lang(en-GB)', 'li[lang="en-US"]');
+        $this->assertNotMatch('li:lang(en-GB)', 'li[lang="fr"]');
+    }
+
+    public function testEnabledPseudoClass()
+    {
+        $this->assertMatch('li:enabled', 'li');
+        $this->assertNotMatch('li:enabled', 'li[disabled]');
+        $this->assertNotMatch('li:enabled', 'li:disabled');
+    }
+
+    public function testDisabledPseudoClass()
+    {
+        $this->assertMatch('li:disabled', 'li[disabled]');
+        $this->assertMatch('li:disabled', 'li:disabled');
+        $this->assertNotMatch('li:disabled', 'li');
+    }
+
+    public function testCheckedPseudoClass()
+    {
+        $this->assertMatch('li:checked', 'li[checked]');
+        $this->assertMatch('li:checked', 'li:checked');
+        $this->assertNotMatch('li:checked', 'li');
+    }
+
+    public function testRoot()
+    {
+        $this->assertMatch('*:root', 'li');
+    }
+
+    public function testDescendantCombinator()
+    {
+        $input = "div.t1 p";
+        $ast = $this->parser->parse($input);
+
+        $this->assertEquals(new CssObject(['element' => 'div', 'classes' => ['t1'], 'children' => [new CssObject(['element' => 'p'])]]), $ast->define());
+
+        $this->assertEquals($input, $ast->toCss());
+        $this->assertEquals("Descendant(All(Element(div), Class(t1)), Element(p))", $ast->__toString());
+
+        $this->assertTrue($ast->matches("div.t1 p"));
+        $this->assertTrue($ast->matches("div.t1 a p"));
+    }
+
+    public function testDoubleNot()
+    {
+        $this->assertNotMatch('p:not(:not(p))', 'p');
     }
 }

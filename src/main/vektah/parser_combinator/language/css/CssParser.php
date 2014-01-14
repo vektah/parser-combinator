@@ -2,18 +2,17 @@
 
 namespace vektah\parser_combinator\language;
 
-use vektah\parser_combinator\combinator\Not;
-use vektah\parser_combinator\combinator\OptionalChoice;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Many;
+use vektah\parser_combinator\combinator\Not;
+use vektah\parser_combinator\combinator\OptionalChoice;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\formatter\Ignore;
 use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\NegativeCharParser;
-use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
 use vektah\parser_combinator\parser\WhitespaceParser;
 
@@ -177,9 +176,6 @@ class CssParser
         $this->rootParser = $stylesheet;
     }
 
-    /**
-     * @return File
-     */
     public function parse($input)
     {
         $result = $this->rootParser->parse(new Input($input));

@@ -3,8 +3,8 @@
 
 namespace vektah\parser_combinator\test\language\css;
 
-use vektah\parser_combinator\Input;
 use PHPUnit_Framework_TestCase as TestCase;
+use vektah\parser_combinator\Input;
 use vektah\parser_combinator\language\css\StringLiteralParser;
 
 class StringLiteralParserTest extends TestCase

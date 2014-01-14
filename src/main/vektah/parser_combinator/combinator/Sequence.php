@@ -27,6 +27,18 @@ class Sequence extends Combinator
             // Any single error causes the whole sequence to error
             if ($result->errorMessage) {
                 $result->positiveMatch = $isPositive;
+
+                if ($aggregatedData) {
+                    $result->errorMessage .= "\nPrevious tokens:\n";
+
+                    foreach ($aggregatedData as $token) {
+                        if (is_callable([$token, '__toString'])) {
+                            $result->errorMessage .= ' - ' . $token->__toString() . "\n";
+                        } else {
+                            $result->errorMessage .= ' - ' . print_r($token, true) . "\n";
+                        }
+                    }
+                }
                 return $result;
             }
         }

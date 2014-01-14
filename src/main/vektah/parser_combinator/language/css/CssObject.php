@@ -3,7 +3,8 @@
 
 namespace vektah\parser_combinator\language\css;
 
-class CssObject {
+class CssObject
+{
     /** @var string[] */
     public $classes = [];
 
@@ -21,6 +22,8 @@ class CssObject {
 
     /** @var string[] */
     public $attributes = [];
+
+    public $isRoot = false;
 
     public function __construct(array $initial = []) {
         foreach ($initial as $key => $value) {

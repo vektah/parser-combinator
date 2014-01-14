@@ -45,7 +45,7 @@ abstract class Combinator extends Parser
     }
 
     /**
-     * @param \vektah\parser_combinator\Input $input
+     * @param Input $input
      * @return Result
      */
     public function parse(Input $input)

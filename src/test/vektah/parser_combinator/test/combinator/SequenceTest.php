@@ -27,7 +27,7 @@ class SequenceTest extends TestCase
     {
         $parser = new Sequence(['asdf', 'hjkl']);
 
-        $this->assertEquals("At line 1 offset 5: Expected 'hjkl' but found 'asdf'", $parser->parse(new Input('asdfasdf'))->errorMessage);
+        $this->assertEquals("At line 1 offset 5: Expected 'hjkl' but found 'asdf'\nPrevious tokens:\n - asdf\n", $parser->parse(new Input('asdfasdf'))->errorMessage);
     }
 
     public function testNonCapturingChild()
