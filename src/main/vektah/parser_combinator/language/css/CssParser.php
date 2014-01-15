@@ -37,11 +37,23 @@ class CssParser extends Grammar
         $this->positive = $this->selector->positive;
 
         $this->hash = new Concatenate(new Sequence('#', new Many(new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '0', ['_-']], 1), $this->nonascii, $this->escape)));
-        $this->percentage = new Concatenate(new Sequence($this->num, '%'));
 
-        $this->comment = new Ignore(new Sequence('/*', new Not('*/'), '*/', $this->ws));
+        $this->numeric = new Concatenate(new Sequence($this->num, new OptionalChoice('%', $this->ident)));
 
-        $this->value = new Many($this->ident, $this->string, $this->percentage, $this->dimension, $this->num, $this->hash, new WhitespaceParser(1));
+        $this->comment = new Ignore(new Sequence('/\*', new Not('\*/'), '\*/', $this->ws));
+
+        $this->values = new Many($this->comment, $this->string, $this->hash, $this->ident, $this->numeric, ',', new WhitespaceParser(1));
+
+        $this->function = new Concatenate(new Sequence(
+            $this->ident,
+            '(',
+            $this->positive,
+            $this->values,
+            ')'
+        ));
+
+        $this->values->prepend($this->function);
+
 
         $this->declaration = new Closure(
             new Sequence(
@@ -49,7 +61,7 @@ class CssParser extends Grammar
                 $this->ws,
                 ':',
                 $this->ws,
-                $this->value,
+                $this->values,
                 $this->ws,
                 new OptionalChoice('!important')
             ),

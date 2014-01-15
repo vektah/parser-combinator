@@ -307,6 +307,10 @@ class CssSelectorTest extends TestCase
         $this->assertNotMatch('li:checked', 'li');
     }
 
+    public function testPseudoWithChildren() {
+        $this->assertMatch('a.button:link td', 'a.button td');
+    }
+
     public function testRoot()
     {
         $this->assertMatch('*:root', 'li');

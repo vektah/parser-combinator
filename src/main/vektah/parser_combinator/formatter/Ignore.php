@@ -10,9 +10,9 @@ class Ignore extends Parser
 {
     private $parser;
 
-    public function __construct(Parser $parser)
+    public function __construct($parser)
     {
-        $this->parser = $parser;
+        $this->parser = Parser::sanitize($parser);
     }
     /**
      * Parse the given input

@@ -29,7 +29,6 @@ use vektah\parser_combinator\parser\EofParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
 use vektah\parser_combinator\parser\RegexParser;
-use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
 use vektah\parser_combinator\parser\literal\FloatLiteral;
 use vektah\parser_combinator\parser\literal\IntLiteral;
@@ -52,7 +51,7 @@ class ProtoParser
 
         $positive = new PositiveMatch();
 
-        $comment = new Ignore(new Sequence(['//', new RegexParser('/^.*/')]));
+        $comment = new Ignore(new Sequence(['//', new RegexParser('.*')]));
         $ws = new Ignore(new Sequence([new WhitespaceParser(), new Choice([new Many([new Sequence([$comment, new WhitespaceParser()])]), ''])]));
 
         // Literals
@@ -60,7 +59,7 @@ class ProtoParser
             return $data === 'true';
         });
 
-        $null = new Closure(new StringParser('null'), function($data) {
+        $null = new Closure('null', function($data) {
             return null;
         });
 
@@ -122,10 +121,10 @@ class ProtoParser
             $label, $positive, $ws,
             new Choice([$type, $identifier]), $ws,
             $identifier, $ws,
-            new StringParser('=', true, false), $ws,
+            new Ignore('='), $ws,
             $int, $ws,
             new Choice([$field_options, '']),
-            new StringParser(';', true, false), $ws
+            new Ignore(';'), $ws
         ]), function($data) {
             $default = null;
             if (isset($data[4])) {

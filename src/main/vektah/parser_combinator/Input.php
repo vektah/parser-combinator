@@ -2,6 +2,8 @@
 
 namespace vektah\parser_combinator;
 
+use vektah\parser_combinator\exception\ParseException;
+
 /**
  * Input to a parser. As this gets handed off to sub parsers the offset and limit will be modified to avoid
  * copying the string (which could be very large)
@@ -113,7 +115,7 @@ class Input
     /**
      * @return string the character at offset $i from the current position
      */
-    public function peek($i)
+    public function peek($i = 0)
     {
         if ($this->offset + $i >= $this->strlen) {
             return null;
@@ -123,10 +125,11 @@ class Input
 
     public function match($pattern, &$matches)
     {
-        // It may turn out that it is faster to build a regex that expects .{$offset} instead of ^
-        // becuase we wouldnt need to do a substr here copying everything. In large files this
-        // could get huge!
-        return preg_match($pattern, substr($this->string, $this->offset), $matches) === 1;
+        try {
+            return preg_match($pattern, $this->string, $matches, 0, $this->offset) === 1;
+        } catch (\Exception $e) {
+            throw new ParseException("Regex failed to compile '$pattern': {$e->getMessage()}");
+        }
     }
 
     /**
@@ -160,11 +163,19 @@ class Input
         $this->offset = $offset;
     }
 
-    public function getPositionDescription()
+    public function getPositionDescription($offset = null)
     {
-        $line = $this->getLine($this->offset);
+        if ($offset === null) {
+            $offset = $this->offset;
+        }
+
+        $line = $this->getLine($offset);
         $offset = $this->offset - $this->getLineOffset($line);
         return 'line ' . $line . ' offset ' . $offset;
+    }
+
+    public function errorHere($message, $positive = false) {
+        return Result::error($message, $positive, $this->getOffset());
     }
 
     public function complete()

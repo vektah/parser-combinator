@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\combinator;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 
 /**
  * Matches any one of the parsers
@@ -17,17 +16,17 @@ class Choice extends Combinator
         foreach ($this->getParsers() as $parser) {
             // Keep trying each of the parsers until one matches.
 
-            $result = $parser->parse($input)->addParser($this);
+            $result = $parser->parse($input);
 
             // Errors and positive results will stop us from searching.
             if (!$result->errorMessage || $result->positiveMatch) {
-                return $result;
+                return $result->addParser($this);
             }
 
             // To be safe we rewind the input after each attempt.
             $input->setOffset($initialOffset);
         }
 
-        return Result::error('At ' . $input->getPositionDescription() . ": Could not find any options that match {$input->get()}");
+        return $input->errorHere("Could not find any options that match {$input->get()}");
     }
 }

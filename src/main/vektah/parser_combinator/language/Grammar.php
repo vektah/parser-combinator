@@ -6,7 +6,6 @@ use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
 use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\parser\Parser;
-use vektah\parser_combinator\parser\StringParser;
 
 class Grammar extends Parser
 {
@@ -14,9 +13,7 @@ class Grammar extends Parser
     private $parsers;
 
     public function __set($name, $parser) {
-        if (is_string($parser)) {
-            $parser = new StringParser($parser);
-        }
+        $parser = Parser::sanitize($parser);
         $this->parsers[$name] = $parser;
         if (!$parser->hasName()) {
             $parser->setName($name);

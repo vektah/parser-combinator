@@ -60,9 +60,43 @@ class CssTest extends TestCase
 
     public function testPercentage()
     {
-        $css = $this->parser->parseString('h1 { -ms-text-size-adjust: 3.14157654%; }');
-        $this->assertEquals([new CssDeclaration('-ms-text-size-adjust', '3 .14157654%')], $css->getDeclarations('h1'));
-        $this->assertEquals('h1{-ms-text-size-adjust:3 .14157654%;}', $css->toCss());
+        $css = $this->parser->parseString('h1 { -ms-text-size-adjust: 32.14157654%; }');
+        $this->assertEquals([new CssDeclaration('-ms-text-size-adjust', '32.14157654%')], $css->getDeclarations('h1'));
+        $this->assertEquals('h1{-ms-text-size-adjust:32.14157654%;}', $css->toCss());
+    }
+
+    public function testInteger()
+    {
+        $css = $this->parser->parseString('h1 { width: 10; }');
+        $this->assertEquals([new CssDeclaration('width', '10')], $css->getDeclarations('h1'));
+        $this->assertEquals('h1{width:10;}', $css->toCss());
+    }
+
+    public function testFloat()
+    {
+        $css = $this->parser->parseString('h1 {line-height: 1.3;}');
+        $this->assertEquals([new CssDeclaration('line-height', '1.3')], $css->getDeclarations('h1'));
+        $this->assertEquals('h1{line-height:1.3;}', $css->toCss());
+    }
+
+    public function testDimension()
+    {
+        $css = $this->parser->parseString('h1 {width: 10px;}');
+        $this->assertEquals([new CssDeclaration('width', '10px')], $css->getDeclarations('h1'));
+        $this->assertEquals('h1{width:10px;}', $css->toCss());
+    }
+
+    public function testFunction()
+    {
+        $css = $this->parser->parseString('h1 {box-shadow: 0 4px 3px -1px rgba(0, 0, 0, 0.3);}');
+
+        $this->assertEquals([new CssDeclaration('box-shadow', '0 4px 3px -1px rgba(0,0,0,0.3)')], $css->getDeclarations('h1'));
+        $this->assertEquals('h1{box-shadow:0 4px 3px -1px rgba(0,0,0,0.3);}', $css->toCss());
+    }
+
+    public function testNestedFunctions()
+    {
+        $this->parser->parseString('h1 {background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffe400), color-stop(100%, #ffc000));}');
     }
 
     public function testImportant()

@@ -10,6 +10,7 @@ use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
 use vektah\parser_combinator\formatter\Flatten;
+use vektah\parser_combinator\formatter\Ignore;
 use vektah\parser_combinator\language\Grammar;
 use vektah\parser_combinator\language\css\selectors\AdjacentSelector;
 use vektah\parser_combinator\language\css\selectors\AllSelector;
@@ -25,8 +26,8 @@ use vektah\parser_combinator\language\css\selectors\PseudoSelector;
 use vektah\parser_combinator\language\css\selectors\UniversalSelector;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\PositiveMatch;
+use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\SingletonTrait;
-use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
 
 /**
@@ -40,33 +41,24 @@ class CssSelectorParser extends Grammar
     {
         $this->positive = new PositiveMatch();
         $this->ws = new WhitespaceParser();
-        $this->nonascii = new Not(new CharRangeParser(["\0" => "\177"], 1));
+        $this->nonascii = new RegexParser('[^\0-\177]+');
         $this->unicode = new Sequence('\\', new CharRangeParser(['0' => '9', 'a' => 'f', 'A' => 'F'], 1, 6), $this->ws);
         $this->escape = new Choice($this->unicode, new Sequence('\\', new Not(new CharRangeParser(['0' => '9', 'a' => 'f', 'A' => 'F', ["\r\n"]], 1))));
         $this->nmstart = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', ['_']], 1, 1), $this->nonascii, $this->escape);
         $this->nmchar = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9', ['_-']], 1), $this->nonascii, $this->escape);
         $this->ident = new Concatenate(new Sequence(new OptionalChoice('-'), $this->nmstart, new Many($this->nmchar)));
-        $this->prefix_match = '^=';
-        $this->suffix_match = '$=';
-        $this->dash_match = '|=';
-        $this->substring_match = '*=';
-        $this->includes = '~=';
-        $this->num = new Choice(
-            new CharRangeParser(['0' => '9'], 1),
-            new Concatenate(
-                new Sequence(
-                    new CharRangeParser(['0' => '9']),
-                    '.',
-                    $this->positive,
-                    new CharRangeParser(['0' => '9', 1])
-                )
-            )
-        );
-        $this->dimension = new Sequence($this->num, $this->ident);
+        $this->prefix_match = '\^=';
+        $this->suffix_match = '\$=';
+        $this->dash_match = '\|=';
+        $this->substring_match = '\*=';
+        $this->includes = '\~=';
+        $this->num = new Choice(new RegexParser('-?[0-9]*\.[0-9]+'), new RegexParser('-?[0-9]+'));
+
+        $this->dimension = new Concatenate(new Sequence($this->num, $this->ident));
 
         $this->string = new StringLiteralParser();
 
-        $this->namespace_prefix = new Closure(new Sequence(new OptionalChoice($this->ident, '*'), '|'), function($data) {
+        $this->namespace_prefix = new Closure(new Sequence(new OptionalChoice('*', $this->ident), '|'), function($data) {
             return $data[0];
         });
 
@@ -121,7 +113,8 @@ class CssSelectorParser extends Grammar
         });
         $this->expression = new Concatenate(new Sequence(new Choice('+', '-', $this->dimension, $this->num, $this->string, $this->ident), $this->ws));
         $this->pseudo = new Closure(
-            new Sequence(':', new OptionalChoice(':'), $this->ident, $this->ws, new OptionalChoice(new Sequence(
+            new Sequence(':', new OptionalChoice(':'), $this->ident, new OptionalChoice(new Sequence(
+                $this->ws,
                 '(',
                 $this->positive,
                 $this->ws,
@@ -136,7 +129,7 @@ class CssSelectorParser extends Grammar
 
         $this->negation = new Closure(
             new Sequence(
-                new StringParser(':not(', false, false),
+                new Ignore(':not\('),
                 $this->positive,
                 $this->ws,
                 new Choice($this->type_selector, $this->universal, $this->hash, $this->class, $this->attrib, $this->pseudo),

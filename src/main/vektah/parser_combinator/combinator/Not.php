@@ -12,12 +12,12 @@ class Not extends Combinator
     public function combine(Input $input)
     {
         if ($input->complete()) {
-            return Result::error('Not cannot be matched at end of stream.')->addParser($this);
+            return $input->errorHere('Not cannot be matched at end of stream.')->addParser($this);
         }
 
         // Initially no parser should match, this would be a zero width result
         if ($this->matches($input)) {
-            return Result::error('At ' . $input->getPositionDescription() . ": Found a match at the start of the source {$input->get()}")->addParser($this);
+            return $input->errorHere("Found a match at the start of the source {$input->get()}")->addParser($this);
         }
 
         $consumed = '';

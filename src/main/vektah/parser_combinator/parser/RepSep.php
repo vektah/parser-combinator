@@ -14,13 +14,8 @@ class RepSep extends Parser
     private $root;
 
     public function __construct($parser, $separator = ',', $allow_trailing = true) {
-        if (is_string($parser)) {
-            $parser = new StringParser($parser);
-        }
-
-        if (is_string($separator)) {
-            $separator = new StringParser($separator);
-        }
+        $parser = Parser::sanitize($parser);
+        $separator = Parser::sanitize($separator);
 
         $sequence = new Sequence(
             $parser,

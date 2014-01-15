@@ -74,7 +74,7 @@ class CharParser extends Parser
         $input->consume($offset);
 
         if ($offset < $this->min) {
-            return Result::error("At {$input->getPositionDescription()}: Did not capture enough chars, expected {$this->min} of [{$this->raw_chars}], found {$offset}.")->addParser($this);
+            return $input->errorHere("Did not capture enough chars, expected {$this->min} of [{$this->raw_chars}], found {$offset}.")->addParser($this);
         }
 
         if ($this->capture) {

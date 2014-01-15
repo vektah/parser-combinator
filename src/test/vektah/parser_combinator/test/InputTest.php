@@ -53,7 +53,7 @@ class InputTest extends TestCase
     {
         $input = new Input('____asdf____', 4);
 
-        $this->assertTrue($input->match('/^asdf/', $matches));
+        $this->assertTrue($input->match('/\Gasdf/', $matches));
         $this->assertEquals(['asdf'], $matches);
     }
 
@@ -61,7 +61,7 @@ class InputTest extends TestCase
     {
         $input = new Input('____asdf____', 4);
 
-        $this->assertTrue($input->match('/^asdf/', $matches, 4));
+        $this->assertTrue($input->match('/\Gasdf/', $matches, 4));
         $this->assertEquals(['asdf'], $matches);
     }
 
@@ -69,7 +69,7 @@ class InputTest extends TestCase
     {
         $input = new Input('____asdf____', 4);
 
-        $this->assertFalse($input->match('/^____/', $matches));
+        $this->assertFalse($input->match('/\G____/', $matches));
     }
 
     public function testGet()

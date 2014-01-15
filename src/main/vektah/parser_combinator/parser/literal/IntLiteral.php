@@ -8,11 +8,11 @@ use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
+use vektah\parser_combinator\formatter\Ignore;
 use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
-use vektah\parser_combinator\parser\StringParser;
 
 /**
  * Generic integer literal parser.
@@ -34,7 +34,7 @@ class IntLiteral extends Parser
         $this->root = new Choice();
 
         if ($hex) {
-            $octInt = new Closure(new Concatenate(new Sequence([new StringParser('0', true, false), new CharRangeParser(['0' => '7'], 1, 1), new PositiveMatch(), new CharRangeParser(['0' => '7'])])), function($data) {
+            $octInt = new Closure(new Concatenate(new Sequence([new Ignore('0'), new CharRangeParser(['0' => '7'], 1, 1), new PositiveMatch(), new CharRangeParser(['0' => '7'])])), function($data) {
                 return octdec($data);
             });
 
@@ -42,7 +42,7 @@ class IntLiteral extends Parser
         }
 
         if ($hex) {
-            $hexInt = new Closure(new Concatenate(new Sequence([new StringParser('0', true, false), new CharParser('xX', 1, 1, false), new PositiveMatch(), new PositiveMatch(), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'], 1), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'])])), function($data) {
+            $hexInt = new Closure(new Concatenate(new Sequence([new Ignore('0'), new CharParser('xX', 1, 1, false), new PositiveMatch(), new PositiveMatch(), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'], 1), new CharRangeParser(['A' => 'F', 'a' => 'f', '0' => '9'])])), function($data) {
                 return hexdec($data);
             });
 

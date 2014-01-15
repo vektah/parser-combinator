@@ -21,5 +21,6 @@ class StringLiteralTest extends TestCase
 
         $this->assertEquals("\b", $parser->parse(new Input('"\b"'))->data);
         $this->assertEquals('"', $parser->parse(new Input('"\""'))->data);
+        $this->assertEquals('\\', $parser->parse(new Input('"\\\\"'))->data);
     }
 }

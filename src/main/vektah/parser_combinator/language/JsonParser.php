@@ -9,8 +9,8 @@ use vektah\parser_combinator\combinator\Many;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\exception\ParseException;
 use vektah\parser_combinator\formatter\Closure;
+use vektah\parser_combinator\formatter\Ignore;
 use vektah\parser_combinator\parser\EofParser;
-use vektah\parser_combinator\parser\StringParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
 use vektah\parser_combinator\parser\literal\FloatLiteral;
 use vektah\parser_combinator\parser\literal\IntLiteral;
@@ -23,19 +23,19 @@ class JsonParser
     public function __construct()
     {
         $ws = new WhitespaceParser();
-        $left_brace = new StringParser('{', true, false);
-        $right_brace = new StringParser('}', true, false);
-        $left_bracket = new StringParser('[', true, false);
-        $right_bracket = new StringParser(']', true, false);
-        $colon = new StringParser(':', true, false);
-        $comma = new StringParser(',', true, false);
+        $left_brace = new Ignore('{');
+        $right_brace = new Ignore('}');
+        $left_bracket = new Ignore('[');
+        $right_bracket = new Ignore(']');
+        $colon = new Ignore(':');
+        $comma = new Ignore(',');
 
         // Types
         $bool = new Closure(new Choice(['true', 'false']), function($data) {
             return $data === 'true';
         });
 
-        $null = new Closure(new StringParser('null'), function($data) {
+        $null = new Closure('null', function($data) {
             return null;
         });
 

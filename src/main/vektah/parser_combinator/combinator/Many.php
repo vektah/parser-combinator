@@ -48,7 +48,7 @@ class Many extends Choice
 
             if ($result->errorMessage) {
                 if ($count < $this->min) {
-                    return Result::error('At ' . $input->getPositionDescription() . ": Expected {$this->min} elements, but found $count");
+                    return $input->errorHere("Expected {$this->min} elements, but found $count");
                 } elseif ($result->positiveMatch) {
                     // If a branch got far enough to assert itself but still returned an error then we need to propagate
                     return $result;
@@ -71,7 +71,7 @@ class Many extends Choice
         }
 
         if ($count < $this->min) {
-            return Result::error('At ' . $input->getPositionDescription() . ": Expected {$this->min} elements, but found $count", $isPositive)->addParser($this);
+            return $input->errorHere("Expected {$this->min} elements, but found $count", $isPositive)->addParser($this);
         }
 
         return Result::match($aggregatedResult, $isPositive);

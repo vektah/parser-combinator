@@ -21,6 +21,9 @@ class Result
     /** @var bool if true this parsers data will be included in the syntax tree */
     public $hasData;
 
+    /** @var int the location this result occurred at */
+    public $offset;
+
     /** @var string The parser stack that generated this result */
     private $parsers = [];
 
@@ -33,12 +36,11 @@ class Result
     }
 
     public function addParser(Parser $parser) {
-        $name = $parser->getName();
-        if ($name !== $this->lastParser) {
-            $this->parsers[] = $name;
+        if ($parser !== $this->lastParser) {
+            $this->parsers[] = $parser;
         }
 
-        $this->lastParser = $name;
+        $this->lastParser = $parser;
 
         return $this;
     }
@@ -47,17 +49,26 @@ class Result
         return $this->parsers;
     }
 
-    public function getParserStack() {
-        return implode('.', array_reverse($this->parsers));
+    public function getInlineParserStack() {
+        return implode('.', array_reverse(array_map(function($value) {
+            return $value->getName();
+        }, $this->parsers)));
     }
 
-    public static function error($message, $positive = false)
+    public function getParserStack() {
+        return " - " . implode("\n - ", array_reverse(array_map(function($value) {
+            return $value->getName();
+        }, $this->parsers)));
+    }
+
+    public static function error($message, $positive = false, $offset = null)
     {
         $result = new Result();
         $result->errorMessage = $message;
         $result->hasData = false;
         $result->match = false;
         $result->positiveMatch = $positive;
+        $result->offset = $offset;
 
         return $result;
     }

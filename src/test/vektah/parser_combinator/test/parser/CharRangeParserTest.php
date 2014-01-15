@@ -32,6 +32,16 @@ class CharRangeParserTest extends TestCase
         $this->assertEquals('asdf', $parser->parse(new Input('asdf-1234-'))->data);
     }
 
+    public function testConsumed()
+    {
+        $input = new Input('asdf00');
+        $parser = new CharRangeParser(['0' => '9', ['asdf']]);
+
+        $this->assertEquals('asdf00', $parser->parse($input)->data);
+
+        $this->assertTrue($input->complete());
+    }
+
     public function testAsciiRange()
     {
         $parser = new CharRangeParser(["\0" => "\177"]);

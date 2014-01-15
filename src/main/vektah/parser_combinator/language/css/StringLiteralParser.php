@@ -7,11 +7,9 @@ use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
 use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Many;
-use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
-use vektah\parser_combinator\parser\CharParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
 
@@ -20,8 +18,8 @@ class StringLiteralParser extends Parser
     public function __construct()
     {
         $this->root = new Closure(new Choice(
-            new Sequence('"', PositiveMatch::instance(), new Concatenate(new Many(new Not(new CharParser("\n\r\f\"", 1)), '\n', '\r', '\f', '\"')), '"'),
-            new Sequence("'", PositiveMatch::instance(), new Concatenate(new Many(new Not(new CharParser("\n\r\f'", 1)), '\n', '\r', '\f', '\\\'')), "'")
+            new Sequence('"', PositiveMatch::instance(), new Concatenate(new Many('[^\n\r\f"\\\\]+', '\\\\[nrf"]')), '"'),
+            new Sequence("'", PositiveMatch::instance(), new Concatenate(new Many("[^\n\r\f'\\\\]+", "\\\\[nrf']")), "'")
         ), function($data) {
             return $data[1];
         });

@@ -5,7 +5,7 @@ namespace vektah\parser_combinator\test\combinator;
 use PHPUnit_Framework_TestCase as TestCase;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Sequence;
-use vektah\parser_combinator\parser\StringParser;
+use vektah\parser_combinator\formatter\Ignore;
 
 class SequenceTest extends TestCase
 {
@@ -26,20 +26,21 @@ class SequenceTest extends TestCase
     public function testMismatch()
     {
         $parser = new Sequence(['asdf', 'hjkl']);
-
-        $this->assertEquals("At line 1 offset 5: Expected 'hjkl' but found 'asdf'\nPrevious tokens:\n - asdf\n", $parser->parse(new Input('asdfasdf'))->errorMessage);
+        $result = $parser->parse(new Input('asdfasdf'));
+        $this->assertEquals("Expected regex '~\\Ghjkl~' to match 'asdf', it does not.\nPrevious tokens:\n - asdf\n", $result->errorMessage);
+        $this->assertEquals(4, $result->offset);
     }
 
     public function testNonCapturingChild()
     {
-        $parser = new Sequence(['asdf', new StringParser('hjkl', true, false)]);
+        $parser = new Sequence('asdf', new Ignore('hjkl'));
 
         $this->assertEquals(['asdf'], $parser->parse(new Input('asdfhjkl'))->data);
     }
 
     public function testAllNonCapturingChildren()
     {
-        $parser = new Sequence([new StringParser('asdf', true, false), new StringParser('hjkl', true, false)]);
+        $parser = new Sequence(new Ignore('asdf'), new Ignore('hjkl'));
 
         $this->assertFalse($parser->parse(new Input('asdfhjkl'))->hasData);
     }

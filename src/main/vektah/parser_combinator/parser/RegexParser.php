@@ -11,30 +11,20 @@ use vektah\parser_combinator\Result;
 class RegexParser extends Parser
 {
     private $expression;
-    private $capture;
 
     /**
-     * @param string $expression        The string to match against
-     * @param bool $capture             If true this parser will output a result.
+     * @param string $expression The string to match against. Keep in mind that the delimiter is always ~
+     * @param string $options
      */
-    public function __construct($expression, $capture = true)
+    public function __construct($expression, $options = '')
     {
-        $this->expression = $expression;
-        $this->capture = $capture;
-        if ($expression[1] != '^') {
-            throw new \InvalidArgumentException('Regex must start with an anchor');
-        }
+        $this->expression = '~\G' . $expression . '~' . $options;
     }
 
     public function parse(Input $input)
     {
         if (!$input->match($this->expression, $matches)) {
-            return Result::error("At {$input->getPositionDescription()}: Expected regex '{$this->expression}' to match '{$input->get()}', it does not.")->addParser($this);
-        }
-
-        if (!$this->capture) {
-            $input->consume(strlen($matches[0]));
-            return Result::nonCapturingMatch()->addParser($this);
+            return $input->errorHere("Expected regex '{$this->expression}' to match '{$input->get()}', it does not.")->addParser($this);
         }
 
         $output = $input->get(strlen($matches[0]));
