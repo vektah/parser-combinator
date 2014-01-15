@@ -8,19 +8,9 @@ use vektah\parser_combinator\parser\CharParser;
 
 class CharParserTest extends TestCase
 {
-    public function testMatchWhitespace()
+    public function testMatch()
     {
-        $matcher = new CharParser(" \n\t\r");
-
-        $input = new Input('    asdf');
-        $this->assertEquals('    ', $matcher->parse($input)->data);
-
-        $this->assertEquals(4, $input->getOffset());
-    }
-
-    public function testLimitedMatch()
-    {
-        $matcher = new CharParser(" \n\t\r", 0, 1);
+        $matcher = new CharParser(" ");
 
         $input = new Input('    asdf');
         $this->assertEquals(' ', $matcher->parse($input)->data);
@@ -28,13 +18,13 @@ class CharParserTest extends TestCase
         $this->assertEquals(1, $input->getOffset());
     }
 
-    public function testNonCapturingMatch()
+    public function testNotMatch()
     {
-        $matcher = new CharParser(" \n\t\r", 1, 1, false);
+        $matcher = new CharParser("x");
 
         $input = new Input('    asdf');
-        $this->assertEquals(null, $matcher->parse($input)->data);
+        $this->assertEquals('', $matcher->parse($input)->data);
 
-        $this->assertEquals(1, $input->getOffset());
+        $this->assertEquals(0, $input->getOffset());
     }
 }

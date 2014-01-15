@@ -175,7 +175,14 @@ class Input
     }
 
     public function errorHere($message, $positive = false) {
-        return Result::error($message, $positive, $this->getOffset());
+        $result = new Result();
+        $result->errorMessage = $message;
+        $result->hasData = false;
+        $result->match = false;
+        $result->positiveMatch = $positive;
+        $result->offset = $this->offset;
+
+        return $result;
     }
 
     public function complete()

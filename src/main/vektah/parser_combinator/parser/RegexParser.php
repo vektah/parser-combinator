@@ -11,14 +11,17 @@ use vektah\parser_combinator\Result;
 class RegexParser extends Parser
 {
     private $expression;
+    private $capturing;
 
     /**
      * @param string $expression The string to match against. Keep in mind that the delimiter is always ~
      * @param string $options
+     * @param bool $capturing
      */
-    public function __construct($expression, $options = '')
+    public function __construct($expression, $options = '', $capturing = true)
     {
         $this->expression = '~\G' . $expression . '~' . $options;
+        $this->capturing = $capturing;
     }
 
     public function parse(Input $input)
@@ -30,6 +33,10 @@ class RegexParser extends Parser
         $output = $input->get(strlen($matches[0]));
         $input->consume(strlen($matches[0]));
 
-        return Result::match($output)->addParser($this);
+        if (!$this->capturing) {
+            return Result::nonCapturingMatch($output)->addParser($this);
+        } else {
+            return Result::match($output)->addParser($this);
+        }
     }
 }

@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\parser;
 
 
-use vektah\parser_combinator\DebuggingInput;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\Result;
 use vektah\parser_combinator\combinator\Sequence;
@@ -26,7 +25,7 @@ abstract class Parser
     public static function sanitize($parser) {
         if (is_string($parser)) {
             if (strlen($parser) === 1) {
-                $parser = new CharParser($parser, 1, 1);
+                $parser = new CharParser($parser);
             } else {
                 $parser = new RegexParser($parser);
             }
@@ -38,16 +37,11 @@ abstract class Parser
     /**
      * @param string $input
      *
-     * @param bool $debug
      * @throws ParseException
      * @return mixed
      */
-    public function parseString($input, $debug = false) {
-        if ($debug) {
-            $input = new DebuggingInput($input);
-        } else {
-            $input = new Input($input);
-        }
+    public function parseString($input) {
+        $input = new Input($input);
         $parser = new Closure(new Sequence($this, new EofParser()), function($data) {
             return $data[0];
         });

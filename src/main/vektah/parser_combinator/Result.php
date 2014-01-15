@@ -30,11 +30,6 @@ class Result
     /** @var string the last named parser on the stack */
     private $lastParser;
 
-    private function __construct()
-    {
-
-    }
-
     public function addParser(Parser $parser) {
         if ($parser !== $this->lastParser) {
             $this->parsers[] = $parser;

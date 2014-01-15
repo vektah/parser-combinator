@@ -23,12 +23,9 @@ use vektah\parser_combinator\language\proto\Option;
 use vektah\parser_combinator\language\proto\Package;
 use vektah\parser_combinator\language\proto\Rpc;
 use vektah\parser_combinator\language\proto\Service;
-use vektah\parser_combinator\parser\CharParser;
-use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\EofParser;
 use vektah\parser_combinator\parser\Parser;
 use vektah\parser_combinator\parser\PositiveMatch;
-use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\WhitespaceParser;
 use vektah\parser_combinator\parser\literal\FloatLiteral;
 use vektah\parser_combinator\parser\literal\IntLiteral;
@@ -44,18 +41,15 @@ class ProtoParser
 
     public function __construct()
     {
-        $identifier = new Concatenate(new Sequence([
-            new CharRangeParser(['a' => 'z', 'A' => 'Z', '_' => '_'], 1),
-            new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9', '_' => '_', '.' => '.']),
-        ]));
+        $identifier = '[a-zA-Z_]{1}[a-zA-Z0-9_\.]*';
 
         $positive = new PositiveMatch();
 
-        $comment = new Ignore(new Sequence(['//', new RegexParser('.*')]));
+        $comment = new Ignore('//.*');
         $ws = new Ignore(new Sequence([new WhitespaceParser(), new Choice([new Many([new Sequence([$comment, new WhitespaceParser()])]), ''])]));
 
         // Literals
-        $bool = new Closure(new Choice(['true', 'false']), function($data) {
+        $bool = new Closure('true|false', function($data) {
             return $data === 'true';
         });
 
@@ -161,10 +155,10 @@ class ProtoParser
         $option = new Closure(new Sequence([
             'option', $positive, $ws,
             new Concatenate(new Sequence([
-                new CharParser('(', 0, 1, false), $ws,
-                new CharParser('.', 0, 1), $ws,
+                new Ignore('\(?'), $ws,
+                '\.?', $ws,
                 $identifier, $ws,
-                new CharParser(')', 0, 1, false), $ws,
+                new Ignore('\)?'), $ws
             ])), $ws,
             new Choice([new Concatenate(new Sequence(['.', $ws, $identifier, $ws])), '']),
             '=', $ws,

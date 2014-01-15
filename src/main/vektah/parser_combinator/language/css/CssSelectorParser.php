@@ -4,7 +4,6 @@ namespace vektah\parser_combinator\language\css;
 
 use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Many;
-use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\combinator\OptionalChoice;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
@@ -24,9 +23,7 @@ use vektah\parser_combinator\language\css\selectors\HashSelector;
 use vektah\parser_combinator\language\css\selectors\NotSelector;
 use vektah\parser_combinator\language\css\selectors\PseudoSelector;
 use vektah\parser_combinator\language\css\selectors\UniversalSelector;
-use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\PositiveMatch;
-use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\SingletonTrait;
 use vektah\parser_combinator\parser\WhitespaceParser;
 
@@ -41,18 +38,18 @@ class CssSelectorParser extends Grammar
     {
         $this->positive = new PositiveMatch();
         $this->ws = new WhitespaceParser();
-        $this->nonascii = new RegexParser('[^\0-\177]+');
-        $this->unicode = new Sequence('\\', new CharRangeParser(['0' => '9', 'a' => 'f', 'A' => 'F'], 1, 6), $this->ws);
-        $this->escape = new Choice($this->unicode, new Sequence('\\', new Not(new CharRangeParser(['0' => '9', 'a' => 'f', 'A' => 'F', ["\r\n"]], 1))));
-        $this->nmstart = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', ['_']], 1, 1), $this->nonascii, $this->escape);
-        $this->nmchar = new Choice(new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '9', ['_-']], 1), $this->nonascii, $this->escape);
+        $this->nonascii = '[^\0-\177]+';
+        $this->unicode = new Sequence('\\\\[0-9a-fA-F]{1,6}', $this->ws);
+        $this->escape = new Choice($this->unicode, '\\\\[^0-9a-fA-F\\r\\n]+');
+        $this->nmstart = new Choice('[a-zA-Z_]', $this->nonascii, $this->escape);
+        $this->nmchar = new Choice('[a-zA-Z0-9_-]+', $this->nonascii, $this->escape);
         $this->ident = new Concatenate(new Sequence(new OptionalChoice('-'), $this->nmstart, new Many($this->nmchar)));
         $this->prefix_match = '\^=';
         $this->suffix_match = '\$=';
         $this->dash_match = '\|=';
         $this->substring_match = '\*=';
         $this->includes = '\~=';
-        $this->num = new Choice(new RegexParser('-?[0-9]*\.[0-9]+'), new RegexParser('-?[0-9]+'));
+        $this->num = new Choice('-?[0-9]*\.[0-9]+', '-?[0-9]+');
 
         $this->dimension = new Concatenate(new Sequence($this->num, $this->ident));
 
@@ -113,9 +110,8 @@ class CssSelectorParser extends Grammar
         });
         $this->expression = new Concatenate(new Sequence(new Choice('+', '-', $this->dimension, $this->num, $this->string, $this->ident), $this->ws));
         $this->pseudo = new Closure(
-            new Sequence(':', new OptionalChoice(':'), $this->ident, new OptionalChoice(new Sequence(
-                $this->ws,
-                '(',
+            new Sequence('::?', $this->ident, new OptionalChoice(new Sequence(
+                '\s*\(',
                 $this->positive,
                 $this->ws,
                 $this->expression,
@@ -123,7 +119,7 @@ class CssSelectorParser extends Grammar
                 ')'
             ))),
             function($data) {
-                return new PseudoSelector($data[2], is_array($data[3]) ? $data[3][1] : null);
+                return new PseudoSelector($data[1], is_array($data[2]) ? $data[2][1] : null);
             }
         );
 
@@ -155,7 +151,7 @@ class CssSelectorParser extends Grammar
             }
         });
 
-        $this->combinator = new Closure(new Sequence(new Choice('+', '~', '>', new WhitespaceParser(1, true)), $this->ws), function($data) {
+        $this->combinator = new Closure(new Sequence('[+\\~>\s]+', $this->ws), function($data) {
             return $data[0];
         });
 

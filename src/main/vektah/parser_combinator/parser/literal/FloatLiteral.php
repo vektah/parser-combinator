@@ -8,10 +8,7 @@ use vektah\parser_combinator\combinator\Choice;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
-use vektah\parser_combinator\parser\CharParser;
-use vektah\parser_combinator\parser\CharRangeParser;
 use vektah\parser_combinator\parser\Parser;
-use vektah\parser_combinator\parser\PositiveMatch;
 
 /**
  * Matches:
@@ -32,22 +29,8 @@ class FloatLiteral extends Parser
             $suffix = '';
         }
 
-        $standardNotation = new Sequence([
-            new CharRangeParser(['0' => '9'], 1),
-            new CharParser('.', 1),
-            new CharRangeParser(['0' => '9']),
-            $suffix
-        ]);
-
-        $sciNotation = new Sequence([
-            new CharRangeParser(['0' => '9'], 1),
-            new CharParser('.'),
-            new CharRangeParser(['0' => '9']),
-            new CharParser('eE', 1),
-            new PositiveMatch(),
-            new CharParser('+-'),
-            new CharRangeParser(['0' => '9'])
-        ]);
+        $standardNotation = new Sequence('[0-9]+\.[0-9]*', $suffix);
+        $sciNotation = new Sequence('[0-9]+\.?[0-9]*[eE]{1}[+-]?[0-9]*', $suffix);
 
         $this->root = new Closure(new Concatenate(new Choice([$sciNotation, $standardNotation])), function ($data) {
             return (float)$data;

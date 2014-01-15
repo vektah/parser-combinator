@@ -7,12 +7,16 @@ use vektah\parser_combinator\parser\SingletonTrait;
 /**
  * Matches zero or more whitespace characters.
  */
-class WhitespaceParser extends CharParser
+class WhitespaceParser extends RegexParser
 {
     use SingletonTrait;
 
     public function __construct($min = 0, $capturing = false)
     {
-        parent::__construct("\n\t\r ", $min, null, $capturing);
+        $count = "*";
+        if ($min) {
+            $count = '{' . $min . ',}';
+        }
+        parent::__construct("\\s$count", 'ms', $capturing);
     }
 }

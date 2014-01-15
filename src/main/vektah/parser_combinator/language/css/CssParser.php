@@ -3,14 +3,13 @@
 namespace vektah\parser_combinator\language\css;
 
 use vektah\parser_combinator\combinator\Many;
-use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\combinator\OptionalChoice;
 use vektah\parser_combinator\combinator\Sequence;
 use vektah\parser_combinator\formatter\Closure;
 use vektah\parser_combinator\formatter\Concatenate;
 use vektah\parser_combinator\formatter\Ignore;
 use vektah\parser_combinator\language\Grammar;
-use vektah\parser_combinator\parser\CharRangeParser;
+use vektah\parser_combinator\parser\RegexParser;
 use vektah\parser_combinator\parser\RepSep;
 use vektah\parser_combinator\parser\SingletonTrait;
 use vektah\parser_combinator\parser\WhitespaceParser;
@@ -36,11 +35,11 @@ class CssParser extends Grammar
         $this->escape = $this->selector->escape;
         $this->positive = $this->selector->positive;
 
-        $this->hash = new Concatenate(new Sequence('#', new Many(new CharRangeParser(['a' => 'z', 'A' => 'Z', '0' => '0', ['_-']], 1), $this->nonascii, $this->escape)));
+        $this->hash = new Concatenate(new Sequence('#', new Many('[a-zA-Z0-9_-]+', $this->nonascii, $this->escape)));
 
         $this->numeric = new Concatenate(new Sequence($this->num, new OptionalChoice('%', $this->ident)));
 
-        $this->comment = new Ignore(new Sequence('/\*', new Not('\*/'), '\*/', $this->ws));
+        $this->comment = new Ignore(new RegexParser('/\*.*?\*/\s*', 'ms'));
 
         $this->values = new Many($this->comment, $this->string, $this->hash, $this->ident, $this->numeric, ',', new WhitespaceParser(1));
 
@@ -77,7 +76,7 @@ class CssParser extends Grammar
                 $this->ws,
                 '{',
                 $this->ws,
-                new RepSep($this->declaration, new Sequence(';', $this->ws)),
+                new RepSep($this->declaration, ';\s*'),
                 '}',
                 $this->ws
             ),

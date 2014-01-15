@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\test\language;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use vektah\parser_combinator\DebuggingInput;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\language\JsonParser;
 
@@ -12,7 +11,7 @@ class JsonParserTest extends TestCase
     public function testTypes()
     {
         $parser = new JsonParser();
-        $this->assertSame('asdf', $parser->parse(new DebuggingInput('"asdf"')));
+        $this->assertSame('asdf', $parser->parse(new Input('"asdf"')));
         $this->assertSame(11, $parser->parse(new Input('11')));
         $this->assertSame(11.11, $parser->parse(new Input('11.11')));
         $this->assertSame(true, $parser->parse(new Input('true')));

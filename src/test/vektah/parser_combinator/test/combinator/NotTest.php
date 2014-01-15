@@ -6,7 +6,6 @@ use PHPUnit_Framework_TestCase as TestCase;
 use vektah\parser_combinator\Input;
 use vektah\parser_combinator\combinator\Not;
 use vektah\parser_combinator\exception\GrammarException;
-use vektah\parser_combinator\parser\CharParser;
 
 class NotTest extends TestCase
 {
@@ -33,7 +32,7 @@ class NotTest extends TestCase
     }
 
     public function testNotChar() {
-        $not = new Not(new CharParser('abcde', 1));
+        $not = new Not('[abcde]+');
         $input = new Input('zzzabbb');
 
         $this->assertEquals(['zzz'], $not->parse($input)->data);
@@ -41,7 +40,7 @@ class NotTest extends TestCase
     }
 
     public function testNotCharZeroWidth() {
-        $not = new Not(new CharParser('abcde'));
+        $not = new Not('');
         $input = new Input('zzzabbb');
 
         $this->setExpectedException(GrammarException::_CLASS);
@@ -49,7 +48,7 @@ class NotTest extends TestCase
     }
 
     public function testEmpty() {
-        $not = new Not(['a']);
+        $not = new Not('a');
         $input = new Input('a');
         $result = $not->parse($input);
 

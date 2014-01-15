@@ -33,7 +33,7 @@ class DebuggingInput extends Input
 
     public function consume($bytes)
     {
-        $this->log(Parser::getInlineParserStack() . " - consume($bytes)");
+        $this->log(Parser::getInlineParserStack() . " - consume($bytes, '{$this->get($bytes)}')");
         $this->getParserData()['consumed'] += $bytes;
         parent::consume($bytes);
     }
@@ -46,7 +46,7 @@ class DebuggingInput extends Input
             $this->log(Parser::getInlineParserStack() . " - rewind($diff)");
         } elseif ($offset > $this->getOffset()) {
             $this->getParserData()['consumed'] += $diff;
-            $this->log(Parser::getInlineParserStack() . " - consume($diff)");
+            $this->log(Parser::getInlineParserStack() . " - consume($diff, '{$this->get($diff)}')");
         }
 
         parent::setOffset($offset);
