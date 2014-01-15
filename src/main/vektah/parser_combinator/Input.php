@@ -153,6 +153,13 @@ class Input
         $this->offset += $bytes;
     }
 
+    public function getAndConsume($bytes) {
+        $result = substr($this->string, $this->offset, $bytes);
+        $this->offset += $bytes;
+
+        return $result;
+    }
+
     public function getOffset()
     {
         return $this->offset;

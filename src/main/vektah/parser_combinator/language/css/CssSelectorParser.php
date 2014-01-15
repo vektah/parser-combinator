@@ -39,11 +39,13 @@ class CssSelectorParser extends Grammar
         $this->positive = new PositiveMatch();
         $this->ws = new WhitespaceParser();
         $this->nonascii = '[^\0-\177]+';
-        $this->unicode = new Sequence('\\\\[0-9a-fA-F]{1,6}', $this->ws);
-        $this->escape = new Choice($this->unicode, '\\\\[^0-9a-fA-F\\r\\n]+');
-        $this->nmstart = new Choice('[a-zA-Z_]', $this->nonascii, $this->escape);
-        $this->nmchar = new Choice('[a-zA-Z0-9_-]+', $this->nonascii, $this->escape);
-        $this->ident = new Concatenate(new Sequence(new OptionalChoice('-'), $this->nmstart, new Many($this->nmchar)));
+
+        $escape = '\\\\[0-9a-fA-F]{1,6}|\\\\[^0-9a-fA-F\\r\\n]+';
+        $nonascii = '[^\0-\177]';
+        $nmstart = "[a-zA-Z_]|$nonascii|$escape";
+        $nmchar = "[a-zA-Z0-9_-]|$nonascii|$escape";
+        $this->ident = "-?($nmstart)($nmchar)*";
+
         $this->prefix_match = '\^=';
         $this->suffix_match = '\$=';
         $this->dash_match = '\|=';
@@ -71,7 +73,7 @@ class CssSelectorParser extends Grammar
             return new UniversalSelector($data[0]);
         });
 
-        $this->hash = new Closure(new Sequence('#', new Concatenate(new Many([$this->nmchar], 1))), function($data) {
+        $this->hash = new Closure(new Sequence('#', $this->ident), function($data) {
             return new HashSelector($data[1]);
         });
 

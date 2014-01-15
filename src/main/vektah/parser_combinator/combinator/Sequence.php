@@ -7,13 +7,13 @@ use vektah\parser_combinator\Result;
 
 class Sequence extends Combinator
 {
-    public function combine(Input $input)
+    public function parse(Input $input)
     {
         $aggregatedData = [];
         $isPositive = false;
 
         foreach ($this->getParsers() as $parser) {
-            $result = $parser->parse($input)->addParser($this);
+            $result = $parser->parse($input);
 
             if ($result->hasData) {
                 $aggregatedData[] = $result->data;
@@ -39,7 +39,7 @@ class Sequence extends Combinator
                         }
                     }
                 }
-                return $result;
+                return $result->addParser($this);
             }
         }
 

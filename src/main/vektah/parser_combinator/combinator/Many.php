@@ -32,7 +32,7 @@ class Many extends Choice
         parent::__construct($parsers);
     }
 
-    public function combine(Input $input)
+    public function parse(Input $input)
     {
         $aggregatedResult = [];
         $isPositive = false;
@@ -40,7 +40,7 @@ class Many extends Choice
 
         $lastOffset = $input->getOffset();
         while ($this->max === null || $count < $this->max) {
-            $result = parent::combine($input)->addParser($this);
+            $result = parent::parse($input)->addParser($this);
 
             if ($result->positiveMatch) {
                 $isPositive = true;

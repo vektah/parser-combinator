@@ -9,7 +9,7 @@ use vektah\parser_combinator\exception\GrammarException;
 
 class Not extends Combinator
 {
-    public function combine(Input $input)
+    public function parse(Input $input)
     {
         if ($input->complete()) {
             return $input->errorHere('Not cannot be matched at end of stream.')->addParser($this);

@@ -2,8 +2,6 @@
 
 namespace vektah\parser_combinator\combinator;
 
-use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 use vektah\parser_combinator\exception\GrammarException;
 use vektah\parser_combinator\parser\Parser;
 
@@ -47,20 +45,4 @@ abstract class Combinator extends Parser
     {
         return $this->parsers;
     }
-
-    /**
-     * @param Input $input
-     * @return Result
-     */
-    public function parse(Input $input)
-    {
-        $result = $this->combine($input)->addParser($this);
-        return $result;
-    }
-
-    /**
-     * @param Input $input
-     * @return Result
-     */
-    abstract public function combine(Input $input);
 }

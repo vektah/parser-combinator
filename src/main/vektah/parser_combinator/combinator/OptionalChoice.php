@@ -10,7 +10,7 @@ use vektah\parser_combinator\Result;
  */
 class OptionalChoice extends Combinator
 {
-    public function combine(Input $input)
+    public function parse(Input $input)
     {
         $initialOffset = $input->getOffset();
 
@@ -19,8 +19,8 @@ class OptionalChoice extends Combinator
 
             $result = $parser->parse($input);
 
-            // Errors and positive results will stop us from searching.
-            if (!$result->errorMessage || $result->positiveMatch) {
+            // Stop on the first match
+            if (!$result->errorMessage || $result->hasData) {
                 return $result->addParser($this);
             }
 

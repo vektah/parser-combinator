@@ -31,11 +31,13 @@ class CssParser extends Grammar
         $this->string = $this->selector->string;
         $this->num = $this->selector->num;
         $this->dimension = $this->selector->dimension;
-        $this->nonascii = $this->selector->nonascii;
-        $this->escape = $this->selector->escape;
+
         $this->positive = $this->selector->positive;
 
-        $this->hash = new Concatenate(new Sequence('#', new Many('[a-zA-Z0-9_-]+', $this->nonascii, $this->escape)));
+        $escape = '\\\\[0-9a-fA-F]{1,6}|\\\\[^0-9a-fA-F\\r\\n]+';
+        $nonascii = '[^\0-\177]';
+
+        $this->hash = new Concatenate(new Sequence('#', "([a-zA-Z0-9_-]+|$escape|$nonascii)+"));
 
         $this->numeric = new Concatenate(new Sequence($this->num, new OptionalChoice('%', $this->ident)));
 

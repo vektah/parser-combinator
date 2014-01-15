@@ -9,7 +9,7 @@ use vektah\parser_combinator\Input;
  */
 class Choice extends Combinator
 {
-    public function combine(Input $input)
+    public function parse(Input $input)
     {
         $initialOffset = $input->getOffset();
 

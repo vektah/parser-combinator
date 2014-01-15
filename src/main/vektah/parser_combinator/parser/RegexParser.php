@@ -30,8 +30,7 @@ class RegexParser extends Parser
             return $input->errorHere("Expected regex '{$this->expression}' to match '{$input->get()}', it does not.")->addParser($this);
         }
 
-        $output = $input->get(strlen($matches[0]));
-        $input->consume(strlen($matches[0]));
+        $output = $input->getAndConsume(strlen($matches[0]));
 
         if (!$this->capturing) {
             return Result::nonCapturingMatch($output)->addParser($this);
