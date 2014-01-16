@@ -105,4 +105,10 @@ class CssTest extends TestCase
         $this->assertEquals([new CssDeclaration('-ms-text-size-adjust', '100%', true)], $css->getDeclarations('h1'));
         $this->assertEquals('h1{-ms-text-size-adjust:100%!important;}', $css->toCss());
     }
+
+    public function testMultipleMatches()
+    {
+        $css = $this->parser->parseString('table.header {padding: 10px 0 5px;} table.columns{ margin: 0 auto; }');
+        $this->assertEquals('padding:10px 0 5px;margin:0 auto;', $css->getMatchingCss('table.header, table.columns'));
+    }
 }

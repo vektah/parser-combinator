@@ -38,12 +38,16 @@ class Css
      */
     public function getDeclarations($selector) {
         $matches = [];
-        $object = CssSelectorParser::instance()->parseString($selector)->define();
+        // When dealing with selectors describing objects commas should denote a match of any of these things.
+        foreach (explode(',', $selector) as $part) {
+            $part = trim($part);
+            $object = CssSelectorParser::instance()->parseString($part)->define();
 
-        foreach ($this->rulesets as $ruleset) {
-            if ($ruleset->getSelector()->matchesObject($object)) {
-                foreach ($ruleset->getDeclarations() as $declaration) {
-                    $matches[] = $declaration;
+            foreach ($this->rulesets as $ruleset) {
+                if ($ruleset->getSelector()->matchesObject($object)) {
+                    foreach ($ruleset->getDeclarations() as $declaration) {
+                        $matches[] = $declaration;
+                    }
                 }
             }
         }

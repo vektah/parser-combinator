@@ -286,6 +286,12 @@ class CssSelectorTest extends TestCase
         $this->assertNotMatch('li:lang(en-GB)', 'li[lang="fr"]');
     }
 
+    public function testMultipleMatches()
+    {
+        $this->assertMatch('table.foo', 'table.foo, table.bar');
+        $this->assertMatch('table.bar', 'table.foo, table.bar');
+    }
+
     public function testEnabledPseudoClass()
     {
         $this->assertMatch('li:enabled', 'li');

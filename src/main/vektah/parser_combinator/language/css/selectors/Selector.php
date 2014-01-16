@@ -12,11 +12,19 @@ abstract class Selector
         if (!is_string($selector)) {
             throw new \InvalidArgumentException("$selector must be a string");
         }
-        $selector = CssSelectorParser::instance()->parseString($selector);
-        $object = $selector->define();
-        $object->isRoot = true;
-        return $this->matchesObject($object);
 
+        // When dealing with selectors describing objects commas should denote a match of any of these things.
+        foreach (explode(',', $selector) as $part) {
+            $part = trim($part);
+            $selector = CssSelectorParser::instance()->parseString($part);
+            $object = $selector->define();
+            $object->isRoot = true;
+            if ($this->matchesObject($object)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     abstract public function matchesObject(CssObject $object);
