@@ -75,6 +75,14 @@ class PhpAnnotationParserTest extends TestCase
         );
     }
 
+    public function testAnnotationWithClassConstantsInArray()
+    {
+        $this->assertEquals(
+            [new DoctrineAnnotation('InheritanceType', ['value' => [new ConstLookup('BAR', 'Foo'), new ConstLookup('BAZ', 'Foo')]])],
+            $this->parser->parseString('@InheritanceType({Foo::BAR, Foo::BAZ})')
+        );
+    }
+
     public function testAnnotationWithArray()
     {
         $this->assertEquals(

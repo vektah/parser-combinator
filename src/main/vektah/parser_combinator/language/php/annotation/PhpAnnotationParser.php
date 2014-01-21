@@ -94,6 +94,7 @@ class PhpAnnotationParser extends Grammar
         $this->array = new Closure(new Sequence(
             new Ignore('{'),
             new RepSep(new Sequence(
+                $this->ws,
                 new OptionalChoice(new Sequence(
                     $this->string,
                     $this->ws,
