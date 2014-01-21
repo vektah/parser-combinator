@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\combinator;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 
 class Sequence extends Combinator
 {
@@ -11,6 +10,7 @@ class Sequence extends Combinator
     {
         $aggregatedData = [];
         $isPositive = false;
+        $initialOffset = $input->getOffset();
 
         foreach ($this->getParsers() as $parser) {
             $result = $parser->parse($input);
@@ -44,9 +44,9 @@ class Sequence extends Combinator
         }
 
         if ($aggregatedData === []) {
-            return Result::nonCapturingMatch($isPositive)->addParser($this);
+            return $input->nonCapturingMatchHere($isPositive, $initialOffset)->addParser($this);
         } else {
-            return Result::match($aggregatedData, $isPositive)->addParser($this);
+            return $input->matchHere($aggregatedData, $isPositive, $initialOffset)->addParser($this);
         }
     }
 }

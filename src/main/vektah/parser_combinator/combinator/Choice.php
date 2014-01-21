@@ -27,6 +27,6 @@ class Choice extends Combinator
             $input->setOffset($initialOffset);
         }
 
-        return $input->errorHere("Could not find any options that match {$input->get()}");
+        return $input->errorHere("Could not find any options that match {$input->get()}")->addParser($this);
     }
 }

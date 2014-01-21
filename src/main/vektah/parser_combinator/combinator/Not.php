@@ -4,7 +4,6 @@ namespace vektah\parser_combinator\combinator;
 
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 use vektah\parser_combinator\exception\GrammarException;
 
 class Not extends Combinator
@@ -26,7 +25,7 @@ class Not extends Combinator
             $input->consume(1);
         }
 
-        return Result::match([$consumed])->addParser($this);
+        return $input->matchHere([$consumed])->addParser($this);
     }
 
     private function matches(Input $input) {

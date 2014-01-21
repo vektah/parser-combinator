@@ -31,6 +31,12 @@ class DebuggingInput extends Input
         return $this->parsers[$parser];
     }
 
+    public function getAndConsume($bytes) {
+        $this->log(Parser::getInlineParserStack() . " - consume($bytes, '{$this->get($bytes)}')");
+        $this->getParserData()['consumed'] += $bytes;
+        return parent::getAndConsume($bytes);
+    }
+
     public function consume($bytes)
     {
         $this->log(Parser::getInlineParserStack() . " - consume($bytes, '{$this->get($bytes)}')");

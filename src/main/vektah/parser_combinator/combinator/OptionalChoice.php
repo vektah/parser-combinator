@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\combinator;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 
 /**
  * Matches any one of the parsers
@@ -28,6 +27,6 @@ class OptionalChoice extends Combinator
             $input->setOffset($initialOffset);
         }
 
-        return Result::match(null)->addParser($this);
+        return $input->matchHere(null)->addParser($this);
     }
 }

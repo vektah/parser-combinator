@@ -181,13 +181,36 @@ class Input
         return 'line ' . $line . ' offset ' . $offset;
     }
 
-    public function errorHere($message, $positive = false) {
+    public function errorHere($message, $positive = false, $offset = null) {
         $result = new Result();
         $result->errorMessage = $message;
         $result->hasData = false;
         $result->match = false;
         $result->positiveMatch = $positive;
-        $result->offset = $this->offset;
+        $result->offset = $offset === null ? $this->offset : $offset;
+
+        return $result;
+    }
+
+    public function matchHere($data, $positive = false, $offset = null)
+    {
+        $result = new Result();
+        $result->hasData = true;
+        $result->data = $data;
+        $result->match = true;
+        $result->positiveMatch = $positive;
+        $result->offset = $offset === null ? $this->offset : $offset;
+
+        return $result;
+    }
+
+    public function nonCapturingMatchHere($positive = false, $offset = null)
+    {
+        $result = new Result();
+        $result->match = true;
+        $result->hasData = false;
+        $result->positiveMatch = $positive;
+        $result->offset = $offset === null ? $this->offset : $offset;
 
         return $result;
     }

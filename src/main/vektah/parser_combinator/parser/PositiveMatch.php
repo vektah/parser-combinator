@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 use vektah\parser_combinator\parser\SingletonTrait;
 
 /**
@@ -22,6 +21,6 @@ class PositiveMatch extends Parser
      */
     public function parse(Input $input)
     {
-        return Result::nonCapturingMatch(true)->addParser($this);
+        return $input->nonCapturingMatchHere(true)->addParser($this);
     }
 }

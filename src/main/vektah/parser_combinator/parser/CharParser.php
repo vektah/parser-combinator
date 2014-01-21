@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 use vektah\parser_combinator\exception\GrammarException;
 
 /**
@@ -37,7 +36,7 @@ class CharParser extends Parser
     {
         if ($input->peek(0) === $this->char) {
             $input->consume(1);
-            return Result::match($this->char);
+            return $input->matchHere($this->char);
         }
 
         return $input->errorHere("$this->char was not found.")->addParser($this);

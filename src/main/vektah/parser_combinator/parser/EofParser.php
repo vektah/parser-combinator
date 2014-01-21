@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 use vektah\parser_combinator\parser\SingletonTrait;
 
 class EofParser extends Parser
@@ -16,6 +15,6 @@ class EofParser extends Parser
             return $input->errorHere("Unable to process {$input->get()}")->addParser($this);
         }
 
-        return Result::nonCapturingMatch()->addParser($this);
+        return $input->nonCapturingMatchHere()->addParser($this);
     }
 }

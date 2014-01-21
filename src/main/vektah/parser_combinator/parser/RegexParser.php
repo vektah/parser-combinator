@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 
 /**
  * Look for a matching regex at the given offset
@@ -33,9 +32,9 @@ class RegexParser extends Parser
         $output = $input->getAndConsume(strlen($matches[0]));
 
         if (!$this->capturing) {
-            return Result::nonCapturingMatch($output)->addParser($this);
+            return $input->nonCapturingMatchHere($output)->addParser($this);
         } else {
-            return Result::match($output)->addParser($this);
+            return $input->matchHere($output)->addParser($this);
         }
     }
 }

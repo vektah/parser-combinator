@@ -4,7 +4,6 @@ namespace vektah\parser_combinator\combinator;
 
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\Result;
 use vektah\parser_combinator\exception\GrammarException;
 
 class Many extends Choice
@@ -74,6 +73,6 @@ class Many extends Choice
             return $input->errorHere("Expected {$this->min} elements, but found $count", $isPositive)->addParser($this);
         }
 
-        return Result::match($aggregatedResult, $isPositive);
+        return $input->matchHere($aggregatedResult, $isPositive);
     }
 }
