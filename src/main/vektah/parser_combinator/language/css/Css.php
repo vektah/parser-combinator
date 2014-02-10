@@ -10,6 +10,9 @@ class Css
     /** @var CssRuleSet[] */
     public $rulesets = [];
 
+    /** @var CssDeclaration[] */
+    private $declarationCache;
+
     /**
      * @param CssRuleSet[] $rulesets
      *
@@ -41,15 +44,22 @@ class Css
         // When dealing with selectors describing objects commas should denote a match of any of these things.
         foreach (explode(',', $selector) as $part) {
             $part = trim($part);
-            $object = CssSelectorParser::instance()->parseString($part)->define();
+            if (!isset($this->declarationCache[$part])) {
+                $part_matches = [];
+                $object = CssSelectorParser::instance()->parseString($part)->define();
 
-            foreach ($this->rulesets as $ruleset) {
-                if ($ruleset->getSelector()->matchesObject($object)) {
-                    foreach ($ruleset->getDeclarations() as $declaration) {
-                        $matches[] = $declaration;
+                foreach ($this->rulesets as $ruleset) {
+                    if ($ruleset->getSelector()->matchesObject($object)) {
+                        foreach ($ruleset->getDeclarations() as $declaration) {
+                            $part_matches[] = $declaration;
+                        }
                     }
                 }
+
+                $this->declarationCache[$part] = $part_matches;
             }
+
+            $matches = array_merge($matches, $this->declarationCache[$part]);
         }
 
         return $matches;

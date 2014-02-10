@@ -2,8 +2,6 @@
 
 namespace vektah\parser_combinator\parser;
 
-use vektah\parser_combinator\parser\SingletonTrait;
-
 /**
  * Matches zero or more whitespace characters.
  */

@@ -3,7 +3,6 @@
 namespace vektah\parser_combinator\parser;
 
 use vektah\parser_combinator\Input;
-use vektah\parser_combinator\parser\SingletonTrait;
 
 class EofParser extends Parser
 {
