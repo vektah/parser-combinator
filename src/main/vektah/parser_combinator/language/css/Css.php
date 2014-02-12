@@ -4,14 +4,16 @@
 namespace vektah\parser_combinator\language\css;
 
 use vektah\parser_combinator\exception\ParseException;
+use vektah\parser_combinator\language\css\selectors\AllSelector;
+use vektah\parser_combinator\language\css\selectors\Selector;
 
 class Css
 {
     /** @var CssRuleSet[] */
     public $rulesets = [];
 
-    /** @var CssDeclaration[] */
-    private $declarationCache;
+    /** @var CssObject[] */
+    private static $objectCache;
 
     /**
      * @param CssRuleSet[] $rulesets
@@ -36,30 +38,52 @@ class Css
     }
 
     /**
+     * @param string|CssObject|Selector $selector
+     * @return CssObject
+     *
+     * @throws \LogicException
+     */
+    public static function buildObject($selector) {
+        if ($selector instanceof CssObject) {
+            return $selector;
+        }
+
+        if (is_string($selector)) {
+            if (!isset(self::$objectCache[$selector])) {
+                // When dealing with selectors describing objects commas should denote a match of any of these things.
+                // An object that must match all of its children should do this.
+                $choices = [];
+                foreach (explode(',', $selector) as $part) {
+                    $part = trim($part);
+                    $choices[] = CssSelectorParser::instance()->parseString($part);
+                }
+
+                self::$objectCache[$selector] = new AllSelector($choices);
+            }
+            $selector = self::$objectCache[$selector];
+        }
+
+        if ($selector instanceof Selector) {
+            return $selector->define();
+        }
+
+        throw new \LogicException('I dont know how to build an object from ' . get_class($selector));
+    }
+
+    /**
      * @param string $selector
      * @return CssDeclaration[]
      */
     public function getDeclarations($selector) {
+        $object = self::buildObject($selector);
+
         $matches = [];
-        // When dealing with selectors describing objects commas should denote a match of any of these things.
-        foreach (explode(',', $selector) as $part) {
-            $part = trim($part);
-            if (!isset($this->declarationCache[$part])) {
-                $part_matches = [];
-                $object = CssSelectorParser::instance()->parseString($part)->define();
-
-                foreach ($this->rulesets as $ruleset) {
-                    if ($ruleset->getSelector()->matchesObject($object)) {
-                        foreach ($ruleset->getDeclarations() as $declaration) {
-                            $part_matches[] = $declaration;
-                        }
-                    }
+        foreach ($this->rulesets as $ruleset) {
+            if ($ruleset->getSelector()->matchesObject($object)) {
+                foreach ($ruleset->getDeclarations() as $declaration) {
+                    $matches[$declaration->getName()] = $declaration;
                 }
-
-                $this->declarationCache[$part] = $part_matches;
             }
-
-            $matches = array_merge($matches, $this->declarationCache[$part]);
         }
 
         return $matches;

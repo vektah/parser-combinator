@@ -34,21 +34,21 @@ class CssTest extends TestCase
     public function testSimpleRule()
     {
         $css = $this->parser->parseString('h1 { color: brown }');
-        $this->assertEquals([new CssDeclaration('color', 'brown')], $css->getDeclarations('h1'));
+        $this->assertEquals(['color' => new CssDeclaration('color', 'brown')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{color:brown;}', $css->toCss());
     }
 
     public function testSimpleRuleWithTrailingSemicolon()
     {
         $css = $this->parser->parseString('h1 { color: brown; }');
-        $this->assertEquals([new CssDeclaration('color', 'brown')], $css->getDeclarations('h1'));
+        $this->assertEquals(['color' => new CssDeclaration('color', 'brown')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{color:brown;}', $css->toCss());
     }
 
     public function testMultipleRules()
     {
         $css = $this->parser->parseString('h1 { color: brown; background-color: #00f; }');
-        $this->assertEquals([new CssDeclaration('color', 'brown'), new CssDeclaration('background-color', '#00f')], $css->getDeclarations('h1'));
+        $this->assertEquals(['color' => new CssDeclaration('color', 'brown'), 'background-color' => new CssDeclaration('background-color', '#00f')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{color:brown;background-color:#00f;}', $css->toCss());
     }
 
@@ -61,28 +61,28 @@ class CssTest extends TestCase
     public function testPercentage()
     {
         $css = $this->parser->parseString('h1 { -ms-text-size-adjust: 32.14157654%; }');
-        $this->assertEquals([new CssDeclaration('-ms-text-size-adjust', '32.14157654%')], $css->getDeclarations('h1'));
+        $this->assertEquals(['-ms-text-size-adjust' => new CssDeclaration('-ms-text-size-adjust', '32.14157654%')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{-ms-text-size-adjust:32.14157654%;}', $css->toCss());
     }
 
     public function testInteger()
     {
         $css = $this->parser->parseString('h1 { width: 10; }');
-        $this->assertEquals([new CssDeclaration('width', '10')], $css->getDeclarations('h1'));
+        $this->assertEquals(['width' => new CssDeclaration('width', '10')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{width:10;}', $css->toCss());
     }
 
     public function testFloat()
     {
         $css = $this->parser->parseString('h1 {line-height: 1.3;}');
-        $this->assertEquals([new CssDeclaration('line-height', '1.3')], $css->getDeclarations('h1'));
+        $this->assertEquals(['line-height' => new CssDeclaration('line-height', '1.3')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{line-height:1.3;}', $css->toCss());
     }
 
     public function testDimension()
     {
         $css = $this->parser->parseString('h1 {width: 10px;}');
-        $this->assertEquals([new CssDeclaration('width', '10px')], $css->getDeclarations('h1'));
+        $this->assertEquals(['width' => new CssDeclaration('width', '10px')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{width:10px;}', $css->toCss());
     }
 
@@ -90,7 +90,7 @@ class CssTest extends TestCase
     {
         $css = $this->parser->parseString('h1 {box-shadow: 0 4px 3px -1px rgba(0, 0, 0, 0.3);}');
 
-        $this->assertEquals([new CssDeclaration('box-shadow', '0 4px 3px -1px rgba(0,0,0,0.3)')], $css->getDeclarations('h1'));
+        $this->assertEquals(['box-shadow' => new CssDeclaration('box-shadow', '0 4px 3px -1px rgba(0,0,0,0.3)')], $css->getDeclarations('h1'));
         $this->assertEquals('h1{box-shadow:0 4px 3px -1px rgba(0,0,0,0.3);}', $css->toCss());
     }
 
@@ -102,7 +102,7 @@ class CssTest extends TestCase
     public function testImportant()
     {
         $css = $this->parser->parseString('h1 { -ms-text-size-adjust: 100% !important}');
-        $this->assertEquals([new CssDeclaration('-ms-text-size-adjust', '100%', true)], $css->getDeclarations('h1'));
+        $this->assertEquals(['-ms-text-size-adjust' => new CssDeclaration('-ms-text-size-adjust', '100%', true)], $css->getDeclarations('h1'));
         $this->assertEquals('h1{-ms-text-size-adjust:100%!important;}', $css->toCss());
     }
 
